@@ -97,6 +97,7 @@ namespace Eng {
    #include "engine_light.h"
    #include "engine_camera.h"
    #include "engine_list.h"
+   #include "engine_particle_emitter.h"
 
    // Storage:
    #include "engine_container.h"
