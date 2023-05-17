@@ -44,13 +44,13 @@ struct Eng::Texture::Reserved
    
    GLuint oglId;                    ///< OpenGL texture ID   
    GLuint64 oglBindlessHandle;      ///< GL_ARB_bindless_texture special handle
-
+   bool isTrasparent;
 
    /**
     * Constructor. 
     */
    Reserved() : bitmap{ Eng::Bitmap::empty }, format{ Eng::Texture::Format::none }, size{ 0, 0, 1 },
-                oglId{ 0 }, oglBindlessHandle{ 0 }
+                oglId{ 0 }, oglBindlessHandle{ 0 },isTrasparent{false}
    {}
 };
 
@@ -246,6 +246,11 @@ uint64_t ENG_API Eng::Texture::getOglBindlessHandle() const
    return reserved->oglBindlessHandle;
 }
 
+bool ENG_API Eng::Texture::getTrasparent()
+{
+    return reserved->isTrasparent;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -382,6 +387,7 @@ bool ENG_API Eng::Texture::load(const Eng::Bitmap &bitmap)
 		   extType        = GL_UNSIGNED_BYTE;
          nrOfComponents = 4;
          _format        = Format::r8g8b8a8;
+         reserved->isTrasparent = true;
 		   break;	      
 
       ////////////////////////////////////
@@ -400,6 +406,7 @@ bool ENG_API Eng::Texture::load(const Eng::Bitmap &bitmap)
 		   extType        = GL_UNSIGNED_BYTE;
          nrOfComponents = 4;
          _format        = Format::r8g8b8a8_compressed;
+         reserved->isTrasparent = true;
 		   break;	      
 
       ///////////////////////////////////////////////
@@ -524,6 +531,7 @@ bool ENG_API Eng::Texture::create(uint32_t sizeX, uint32_t sizeY, Format format)
 		   extFormat      = GL_RGBA;
 		   extType        = GL_UNSIGNED_BYTE;
          nrOfComponents = 4;
+         reserved->isTrasparent = true;
 		   break;	      
 
       //////////////////////
