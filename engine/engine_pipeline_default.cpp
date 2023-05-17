@@ -184,7 +184,7 @@ void main()
       fragColor += (1.0f - roughness_texel.r) * pow(nDotH, 70.0f) * lightColor * shadow;         
    }
    
-   outFragment = vec4((mtlEmission / float(totNrOfLights)) + fragColor * albedo_texel.xyz, justUseIt);      
+   outFragment = vec4((mtlEmission / float(totNrOfLights)) + fragColor * albedo_texel.xyz, mtlOpacity);      
 })";
 
 

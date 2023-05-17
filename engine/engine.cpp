@@ -330,7 +330,8 @@ bool ENG_API Eng::Base::init()
    glDepthFunc(GL_LEQUAL);
    glPixelStorei(GL_PACK_ALIGNMENT, 1);         // Not sure whether it is really global state
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);       // Not sure whether it is really global state
-
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable(GL_BLEND);
    // Done:
    return true;
 }
