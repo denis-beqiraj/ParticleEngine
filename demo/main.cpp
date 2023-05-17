@@ -18,6 +18,7 @@
    #include <iostream>
    #include <chrono>
 
+   #include <engine_particle_emitter.h>
 
 
 //////////   
@@ -142,6 +143,16 @@ int main(int argc, char *argv[])
    // Loading scene:   
    Eng::Ovo ovo; 
    std::reference_wrapper<Eng::Node> root = ovo.load("simple3dScene.ovo");
+
+   {
+      Eng::Container& container = Eng::Container::getInstance();
+      Eng::ParticleEmitter particleEmitter;
+      particleEmitter.setName("Particle Emitter");
+      container.add(particleEmitter);
+      std::reference_wrapper<Eng::ParticleEmitter> _particleEmitter = container.getLastParticleEmitter();
+      root.get().addChild(_particleEmitter);
+   }
+
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
    // Get light ref:
@@ -152,7 +163,7 @@ int main(int argc, char *argv[])
    // light.get().setProjMatrix(glm::perspective(glm::radians(75.0f), 1.0f, 1.0f, 1000.0f)); // Perspective projection         
    
    // Get torus knot ref:
-   std::reference_wrapper<Eng::Mesh> tknot = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Torus Knot001"));   
+   std::reference_wrapper<Eng::Mesh> tknot = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Torus Knot001"));
 
    // Rendering elements:
    Eng::List list;

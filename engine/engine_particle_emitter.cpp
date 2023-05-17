@@ -19,7 +19,10 @@
 
 // OGL:      
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h>  
+
+
+Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter();
 
 
 
@@ -79,6 +82,7 @@ ENG_API Eng::ParticleEmitter::~ParticleEmitter()
  */
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
+    printf("Particle emitter update\n");
 
     // Done:
     return true;

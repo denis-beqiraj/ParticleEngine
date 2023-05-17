@@ -8,6 +8,8 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	//////////
 	public: //
 	//////////
+	static ParticleEmitter empty;
+
 	// Const/dest:
 	ParticleEmitter();
 	ParticleEmitter(ParticleEmitter&& other);

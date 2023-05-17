@@ -43,6 +43,7 @@ struct Eng::Container::Reserved
    std::list<Eng::Light> allLights;
    std::list<Eng::Material> allMaterials;
    std::list<Eng::Texture> allTextures;
+   std::list<Eng::ParticleEmitter> allParticleEmitters;
    
 
    /**
@@ -182,6 +183,20 @@ Eng::Texture ENG_API &Eng::Container::getLastTexture() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
+ * Gets last added particle emitter.
+ * @return last added particle emitter
+ */
+Eng::ParticleEmitter ENG_API &Eng::Container::getLastParticleEmitter() const
+{
+   // Safety net:
+   if (reserved->allParticleEmitters.empty())
+      return Eng::ParticleEmitter::empty;
+   return reserved->allParticleEmitters.back();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
  * Gets direct access to the list of nodes.
  * @return list of nodes
  */
@@ -237,6 +252,17 @@ std::list<Eng::Texture> ENG_API &Eng::Container::getTextureList()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
+ * Gets direct access to the list of particle emitters.
+ * @return list of particle emitters
+ */
+std::list<Eng::ParticleEmitter> ENG_API &Eng::Container::getParticleEmitterList()
+{
+   return reserved->allParticleEmitters;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
  * Returns, if existing, the first object with the given name among its various lists. 
  * @param name object name
  * @return found object or empty
@@ -257,6 +283,11 @@ Eng::Object ENG_API &Eng::Container::find(const std::string &name) const
 
    // Seach in textures:
    for (auto &c : reserved->allTextures)
+      if (c.getName() == name)
+         return c;
+
+   // Search in particle emitters:
+   for (auto &c : reserved->allParticleEmitters)
       if (c.getName() == name)
          return c;
    
@@ -333,7 +364,8 @@ bool ENG_API Eng::Container::reset()
    reserved->allMeshes.clear();   
    reserved->allLights.clear();   
    reserved->allMaterials.clear();   
-   reserved->allTextures.clear();   
+   reserved->allTextures.clear();  
+   reserved->allParticleEmitters.clear();
    
    // Done:
    setDirty(true);
@@ -361,30 +393,31 @@ bool ENG_API Eng::Container::add(Eng::Object &obj)
       reserved->allMeshes.push_back(std::move(dynamic_cast<Eng::Mesh &>(obj)));      
       return true;
    }
-   else      
-      if (dynamic_cast<Eng::Light *>(&obj))
-      {
-         reserved->allLights.push_back(std::move(dynamic_cast<Eng::Light &>(obj)));      
-         return true;
-      }
-      else      
-         if (dynamic_cast<Eng::Node *>(&obj))
-         {
-            reserved->allNodes.push_back(std::move(dynamic_cast<Eng::Node &>(obj)));         
-            return true;
-         }      
-         else
-            if (dynamic_cast<Eng::Material *>(&obj))
-            {
-               reserved->allMaterials.push_back(std::move(dynamic_cast<Eng::Material &>(obj)));         
-               return true;
-            }      
-            else
-               if (dynamic_cast<Eng::Texture *>(&obj))
-               {
-                  reserved->allTextures.push_back(std::move(dynamic_cast<Eng::Texture &>(obj)));         
-                  return true;
-               }      
+   else if (dynamic_cast<Eng::Light *>(&obj))
+   {
+      reserved->allLights.push_back(std::move(dynamic_cast<Eng::Light &>(obj)));      
+      return true;
+   }
+   else if (dynamic_cast<Eng::Node *>(&obj))
+   {
+      reserved->allNodes.push_back(std::move(dynamic_cast<Eng::Node &>(obj)));         
+      return true;
+   }      
+   else if (dynamic_cast<Eng::Material *>(&obj))
+   {
+      reserved->allMaterials.push_back(std::move(dynamic_cast<Eng::Material &>(obj)));         
+      return true;
+   }      
+   else if (dynamic_cast<Eng::Texture *>(&obj))
+   {
+      reserved->allTextures.push_back(std::move(dynamic_cast<Eng::Texture &>(obj)));         
+      return true;
+   }
+   else if (dynamic_cast<Eng::ParticleEmitter *>(&obj))
+   {
+      reserved->allParticleEmitters.push_back(std::move(dynamic_cast<Eng::ParticleEmitter &>(obj)));
+      return true;
+   }
    
    // Done:
    ENG_LOG_ERROR("Unsupported type");   

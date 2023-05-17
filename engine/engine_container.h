@@ -36,12 +36,14 @@ public: //
    Eng::Mesh &getLastMesh() const;   
    Eng::Light &getLastLight() const;   
    Eng::Material &getLastMaterial() const;   
-   Eng::Texture &getLastTexture() const;   
+   Eng::Texture &getLastTexture() const;  
+   Eng::ParticleEmitter &getLastParticleEmitter() const;
    std::list<Eng::Node> &getNodeList();
    std::list<Eng::Mesh> &getMeshList();
    std::list<Eng::Light> &getLightList();
    std::list<Eng::Material> &getMaterialList();
    std::list<Eng::Texture> &getTextureList();
+   std::list<Eng::ParticleEmitter> &getParticleEmitterList();
    
    // Finders:
    Eng::Object &find(const std::string &name) const;   ///< By name

@@ -173,9 +173,14 @@ bool ENG_API Eng::List::process(const Eng::Node &node, const glm::mat4 &prevMatr
       reserved->renderableElem.insert(reserved->renderableElem.begin(), 1, re);
       reserved->nrOfLights++;
    }
-   else
-      if (dynamic_cast<const Eng::Mesh *>(&node)) // Only meshes
-         reserved->renderableElem.push_back(re);
+   else if (dynamic_cast<const Eng::Mesh *>(&node)) // Only meshes
+   {
+      reserved->renderableElem.push_back(re);
+   }
+   else if (dynamic_cast<const Eng::ParticleEmitter *>(&node))
+   {
+      reserved->renderableElem.push_back(re);
+   }
 
    // Parse hierarchy recursively:
    for (auto &n : node.getListOfChildren())
