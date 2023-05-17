@@ -82,6 +82,7 @@ public: //
    uint32_t getSizeZ() const;   
    uint32_t getOglHandle() const;
    uint64_t getOglBindlessHandle() const;
+   bool getTrasparent();
 
    // Bitmap:
    bool load(const Eng::Bitmap &bitmap);

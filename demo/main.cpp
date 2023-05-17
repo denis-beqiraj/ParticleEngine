@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
    /////////////////
    // Loading scene:   
    Eng::Ovo ovo; 
-   std::reference_wrapper<Eng::Node> root = ovo.load("simple3dScene.ovo");
+
+   std::reference_wrapper<Eng::Node> root = ovo.load("simple3dSceneWithTransp.ovo");
 
    {
       Eng::Container& container = Eng::Container::getInstance();
