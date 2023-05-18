@@ -93,7 +93,7 @@ ENG_API Eng::ParticleEmitter::~ParticleEmitter()
     ENG_LOG_DETAIL("[-]");
 }
 
-Eng::ParticleEmitter::Particle* ENG_API Eng::ParticleEmitter::getFreeParticle() const
+Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() const
 {
     Reserved* pReserved = reserved.get();
 
