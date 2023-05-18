@@ -415,7 +415,9 @@ bool ENG_API Eng::PipelineDefault::render(const Eng::Camera &camera, const Eng::
       reserved->shadowMapping.getShadowMap().render(4);      
       
       // Render meshes:
-      list.render(viewMatrix, Eng::List::Pass::meshes);      
+      list.render(viewMatrix, Eng::List::Pass::meshes);     
+      list.render(viewMatrix, Eng::List::Pass::trasparent);
+
    }
 
    // Disable blending, in case we used it:

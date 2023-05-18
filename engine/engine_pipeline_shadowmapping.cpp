@@ -249,7 +249,7 @@ bool ENG_API Eng::PipelineShadowMapping::render(const Eng::List::RenderableElem 
    glm::mat4 viewMatrix = glm::inverse(lightRe.matrix);       
 
    // Render meshes:   
-   list.render(viewMatrix, Eng::List::Pass::meshes);         
+   list.render(viewMatrix, Eng::List::Pass::allmeshes);         
 
    // Redo OpenGL settings:
    glColorMask(1, 1, 1, 1);
