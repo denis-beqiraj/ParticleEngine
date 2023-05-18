@@ -13,6 +13,7 @@
 
    // Main include:
    #include "engine.h"
+   #include <algorithm>
 
 
 
@@ -231,8 +232,12 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
          /////////////////////
       case Pass::trasparent: //
           startRange = reserved->nrOfMeshes + 1;
+          std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.end(), [cameraMatrix](RenderableElem a, RenderableElem b) {
+              return glm::length(a.matrix[3] - cameraMatrix[3]) < glm::length(b.matrix[3] - cameraMatrix[3]);
+              });
           break;
    }
+   
    // Iterate through the range:
    for (size_t c = startRange; c < endRange; c++)
    {
