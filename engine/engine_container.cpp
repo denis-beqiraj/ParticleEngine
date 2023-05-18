@@ -398,6 +398,11 @@ bool ENG_API Eng::Container::add(Eng::Object &obj)
       reserved->allLights.push_back(std::move(dynamic_cast<Eng::Light &>(obj)));      
       return true;
    }
+   else if (dynamic_cast<Eng::ParticleEmitter *>(&obj))
+   {
+      reserved->allParticleEmitters.push_back(std::move(dynamic_cast<Eng::ParticleEmitter &>(obj)));
+      return true;
+   }
    else if (dynamic_cast<Eng::Node *>(&obj))
    {
       reserved->allNodes.push_back(std::move(dynamic_cast<Eng::Node &>(obj)));         
@@ -411,11 +416,6 @@ bool ENG_API Eng::Container::add(Eng::Object &obj)
    else if (dynamic_cast<Eng::Texture *>(&obj))
    {
       reserved->allTextures.push_back(std::move(dynamic_cast<Eng::Texture &>(obj)));         
-      return true;
-   }
-   else if (dynamic_cast<Eng::ParticleEmitter *>(&obj))
-   {
-      reserved->allParticleEmitters.push_back(std::move(dynamic_cast<Eng::ParticleEmitter &>(obj)));
       return true;
    }
    

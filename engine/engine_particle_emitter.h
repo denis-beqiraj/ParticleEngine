@@ -11,7 +11,7 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	static ParticleEmitter empty;
 
 	// Const/dest:
-	ParticleEmitter();
+	ParticleEmitter(unsigned int maxParticles, unsigned int newParticlesPerFrame);
 	ParticleEmitter(ParticleEmitter&& other);
 	ParticleEmitter(ParticleEmitter const&) = delete;
 	~ParticleEmitter();
@@ -25,6 +25,26 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	///////////
 	private: //
 	///////////
+
+	struct Particle {
+		glm::vec3 position, velocity;
+		glm::vec4 color;
+		float life;
+
+		Particle() : position(0.0f), velocity(0.0f), color(1.0f), life(0.0f) {}
+	};
+
+	struct ParticleArrayNode {
+		bool isFree;
+
+		union {
+			Particle particle;
+			ParticleArrayNode* nextFree;
+		};
+	};
+
+	Particle* getFreeParticle() const;
+	void respawnParticle(Particle* particle, const glm::vec3& position) const;
 
 	// Reserved:
 	struct Reserved;

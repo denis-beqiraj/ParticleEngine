@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
    {
       Eng::Container& container = Eng::Container::getInstance();
-      Eng::ParticleEmitter particleEmitter;
+      Eng::ParticleEmitter particleEmitter(500, 2);
       particleEmitter.setName("Particle Emitter");
       container.add(particleEmitter);
       std::reference_wrapper<Eng::ParticleEmitter> _particleEmitter = container.getLastParticleEmitter();
