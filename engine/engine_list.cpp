@@ -14,7 +14,7 @@
    // Main include:
    #include "engine.h"
    #include <algorithm>
-
+   #include "GLFW/glfw3.h"
 
 
 ////////////
@@ -229,15 +229,23 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
          endRange = reserved->nrOfMeshes+1;
          break;
 
-         /////////////////////
+      /////////////////////////
       case Pass::trasparent: //
           startRange = reserved->nrOfMeshes + 1;
           std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.end(), [cameraMatrix](RenderableElem a, RenderableElem b) {
               return glm::length(a.matrix[3] - cameraMatrix[3]) < glm::length(b.matrix[3] - cameraMatrix[3]);
               });
+          isTrasparent = true;
+          break;
+
+      /////////////////////////
+      case Pass::allmeshes: //
+          startRange = reserved->nrOfLights;
           break;
    }
-   
+   if (isTrasparent) {
+       glDepthMask(false);
+   }
    // Iterate through the range:
    for (size_t c = startRange; c < endRange; c++)
    {
@@ -245,7 +253,9 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
        glm::mat4 finalMatrix = cameraMatrix * re.matrix;
        re.reference.get().render(0, &finalMatrix);
    }
-
+   if (isTrasparent) {
+       glDepthMask(true);
+   }
    // Done:
    return true;
 }
