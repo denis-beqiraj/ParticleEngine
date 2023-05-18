@@ -31,7 +31,8 @@ public: //
       // Categories:
       all,      
       lights,
-      meshes,      
+      meshes,
+      trasparent,
 
       // Terminator:
       last

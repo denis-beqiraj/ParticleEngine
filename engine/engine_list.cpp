@@ -36,12 +36,12 @@ struct Eng::List::Reserved
 {    
    std::vector<Eng::List::RenderableElem> renderableElem;   ///< List of rendering elements
    uint32_t nrOfLights;                                     ///< Number of lights in the list (lights come first)
-
+   uint32_t nrOfMeshes;                                     ///< Number of meshes in the list
 
    /**
     * Constructor. 
     */
-   Reserved() : nrOfLights{ 0 }
+   Reserved() : nrOfLights{ 0 }, nrOfMeshes{ 0 }
    {}
 };
 
@@ -100,6 +100,7 @@ void ENG_API Eng::List::reset()
 {	
    reserved->renderableElem.clear();
    reserved->nrOfLights = 0;
+   reserved->nrOfMeshes = 0;
 }
 
 
@@ -173,9 +174,19 @@ bool ENG_API Eng::List::process(const Eng::Node &node, const glm::mat4 &prevMatr
       reserved->renderableElem.insert(reserved->renderableElem.begin(), 1, re);
       reserved->nrOfLights++;
    }
-   else
-      if (dynamic_cast<const Eng::Mesh *>(&node)) // Only meshes
-         reserved->renderableElem.push_back(re);
+   else if (dynamic_cast<const Eng::Mesh*>(&node)) // Only meshes
+   {
+       if (dynamic_cast<const Eng::Mesh*>(&node)->getMaterial().getOpacity() >= 1.0f && !dynamic_cast<const Eng::Mesh*>(&node)->getMaterial().getTexture().getTrasparent()) 
+       {
+           reserved->renderableElem.insert(reserved->renderableElem.begin() + reserved->nrOfLights, 1, re);
+           reserved->nrOfMeshes++;
+       }
+       else 
+       {
+           reserved->renderableElem.push_back(re);
+       }
+   }
+   
 
    // Parse hierarchy recursively:
    for (auto &n : node.getListOfChildren())
@@ -199,7 +210,7 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
    // Define range:
    size_t startRange = 0;
    size_t endRange = reserved->renderableElem.size();
-
+   bool isTrasparent = false;
    switch (pass)
    {
       //////////////////
@@ -214,15 +225,20 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
       /////////////////////
       case Pass::meshes: //
          startRange = reserved->nrOfLights;
+         endRange = reserved->nrOfMeshes+1;
          break;
-   }
 
+         /////////////////////
+      case Pass::trasparent: //
+          startRange = reserved->nrOfMeshes + 1;
+          break;
+   }
    // Iterate through the range:
    for (size_t c = startRange; c < endRange; c++)
-   {      
-      RenderableElem &re = reserved->renderableElem.at(c);
-      glm::mat4 finalMatrix = cameraMatrix * re.matrix;          
-      re.reference.get().render(0, &finalMatrix);
+   {
+       RenderableElem& re = reserved->renderableElem.at(c);
+       glm::mat4 finalMatrix = cameraMatrix * re.matrix;
+       re.reference.get().render(0, &finalMatrix);
    }
 
    // Done:

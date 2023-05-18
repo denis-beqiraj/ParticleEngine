@@ -246,7 +246,7 @@ uint64_t ENG_API Eng::Texture::getOglBindlessHandle() const
    return reserved->oglBindlessHandle;
 }
 
-bool ENG_API Eng::Texture::getTrasparent()
+bool ENG_API Eng::Texture::getTrasparent() const
 {
     return reserved->isTrasparent;
 }
