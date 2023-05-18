@@ -250,6 +250,7 @@ bool ENG_API Eng::PipelineShadowMapping::render(const Eng::List::RenderableElem 
 
    // Render meshes:   
    list.render(viewMatrix, Eng::List::Pass::meshes);         
+   list.render(viewMatrix, Eng::List::Pass::trasparent);
 
    // Redo OpenGL settings:
    glColorMask(1, 1, 1, 1);
