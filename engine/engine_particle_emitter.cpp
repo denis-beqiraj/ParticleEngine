@@ -41,8 +41,6 @@ struct Eng::ParticleEmitter::Reserved
     unsigned int newParticlesPerFrame;
 };
 
-
-
 ///////////////////////////////////
 // BODY OF CLASS ParticleEmitter //
 //////////////////////////////////

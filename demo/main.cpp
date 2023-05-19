@@ -34,8 +34,7 @@
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
    Eng::PipelineFullscreen2D full2dPipe;
-
-
+   Eng::PipelineParticle particlePipe;
 
 ///////////////
 // CALLBACKS //
@@ -162,7 +161,6 @@ int main(int argc, char *argv[])
    light.get().setColor({ 1.5f, 1.5f, 1.5f });
    light.get().setProjMatrix(glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, 1.0f, 1000.0f)); // Orthographic projection
    // light.get().setProjMatrix(glm::perspective(glm::radians(75.0f), 1.0f, 1.0f, 1000.0f)); // Perspective projection         
-   
    // Get torus knot ref:
    std::reference_wrapper<Eng::Mesh> tknot = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Torus Knot001"));
 
@@ -177,6 +175,8 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
+   Eng::ParticleEmitter particle_emitter(200, 10);
+
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -194,12 +194,12 @@ int main(int argc, char *argv[])
       
       // Main rendering:
       eng.clear();      
-         dfltPipe.render(camera, list);
+         particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
       eng.swap();    
-
+      
       auto stop = timer.now();
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
