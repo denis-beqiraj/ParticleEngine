@@ -39,6 +39,9 @@ struct Eng::ParticleEmitter::Reserved
     Eng::ParticleEmitter::ParticleArrayNode* particleArrayFreeListHead;
     unsigned int maxParticles;
     unsigned int newParticlesPerFrame;
+    Eng::PipelineParticle particlePipe;
+    Eng::Texture texture;
+
 };
 
 ///////////////////////////////////
@@ -112,9 +115,9 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm
 {
     float random = ((rand() % 100) - 50) / 10.0f;
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
-    particle->position = position + random; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+    particle->position = position; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
-    particle->life = 1.0f;
+    particle->life = 10.0f;
     particle->velocity = glm::vec3(0.0f, 0.1f, 0.0f); // TODO(jan): calculate better initial velocity
 }
 
@@ -137,7 +140,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     for (unsigned int i = 0; i < pReserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
         if (particle != NULL) {
-            respawnParticle(particle, position);
+            respawnParticle(particle, glm::vec3(0.0f,0.0f,-10.0f));
         }
     }
 
@@ -159,7 +162,17 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 
         node++;
     }
-
+    ParticleArrayNode* drawNode = pReserved->particles;
+    for (unsigned int i = 0; i < pReserved->maxParticles; i++) {
+        if (!drawNode->isFree) {
+            glm::mat4 model(1.0f);
+            model[3] = glm::vec4(drawNode->particle.position,1.0f);
+            std::cout << glm::to_string(model[3])<<std::endl;
+            reserved->particlePipe.setModel(model);
+            reserved->particlePipe.render(reserved->texture.getDefault(true));
+        }
+        drawNode++;
+    }
     // Done:
     return true;
 }

@@ -84,6 +84,7 @@ struct Eng::PipelineParticle::Reserved
     Eng::Program program;
     Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
     unsigned int particle;
+    glm::mat4 model;
 
     /**
      * Constructor.
@@ -218,6 +219,11 @@ bool ENG_API Eng::PipelineParticle::free()
 }
 
 
+void ENG_API Eng::PipelineParticle::setModel(glm::mat4 model)
+{
+    reserved->model = model;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Main rendering method for the pipeline.
@@ -225,17 +231,14 @@ bool ENG_API Eng::PipelineParticle::free()
  * @param list list of renderables
  * @return TF
  */
-bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, const Eng::List& list)
+bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture)
 {
     // Safety net:
-    if (texture == Eng::Texture::empty || list == Eng::List::empty)
+    if (texture == Eng::Texture::empty)
     {
         ENG_LOG_ERROR("Invalid params");
         return false;
     }
-
-    // Just to update the cache
-    this->Eng::Pipeline::render(list);
 
     // Lazy-loading:
     if (this->isDirty())
@@ -255,7 +258,7 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, const En
     program.render();
     texture.render(0);
     program.setMat4("projection", glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 1.0f, 1000.0f));
-    program.setMat4("model", glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,-10.0f)));
+    program.setMat4("model", reserved->model);
     glBindVertexArray(reserved->particle);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

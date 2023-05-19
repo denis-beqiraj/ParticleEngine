@@ -23,10 +23,10 @@ public: //
 	PipelineParticle(PipelineParticle&& other);
 	PipelineParticle(PipelineParticle const&) = delete;
 	virtual ~PipelineParticle();
-
+	void setModel(glm::mat4 model);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
-	bool render(const Eng::Texture& texture, const Eng::List& list);
+	bool render(const Eng::Texture& texture);
 
 	// Managed:
 	bool init() override;

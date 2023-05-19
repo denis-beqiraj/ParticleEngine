@@ -34,7 +34,6 @@
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
    Eng::PipelineFullscreen2D full2dPipe;
-   Eng::PipelineParticle particlePipe;
 
 ///////////////
 // CALLBACKS //
@@ -175,7 +174,7 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
-   Eng::ParticleEmitter particle_emitter(200, 10);
+   Eng::ParticleEmitter particleEmitter(200, 1);
 
    while (eng.processEvents())
    {      
@@ -194,7 +193,9 @@ int main(int argc, char *argv[])
       
       // Main rendering:
       eng.clear();
-         dfltPipe.render(camera, list);
+      glm::mat4 pos(1.0f);
+         particleEmitter.render(0U,(void*)&pos);
+         //dfltPipe.render(camera, list);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
