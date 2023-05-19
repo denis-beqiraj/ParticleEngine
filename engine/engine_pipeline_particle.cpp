@@ -1,5 +1,5 @@
 /**
- * @file		engine_pipeline_fullscreen2d.cpp 
+ * @file		engine_pipeline_fullscreen2d.cpp
  * @brief	A pipeline for rendering a texture to the fullscreen in 2D
  *
  * @author	Achille Peternier (achille.peternier@supsi.ch), (C) SUPSI
@@ -7,16 +7,16 @@
 
 
 
-//////////////
-// #INCLUDE //
-//////////////
+ //////////////
+ // #INCLUDE //
+ //////////////
 
-   // Main include:
-   #include "engine.h"
+    // Main include:
+#include "engine.h"
 
-   // OGL:      
-   #include <GL/glew.h>
-   #include <GLFW/glfw3.h>
+// OGL:      
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 
 
@@ -32,17 +32,14 @@ static const std::string pipeline_vs = R"(
 
 // Out:
 out vec2 texCoord;
-
+layout (location = 0) in vec4 vertex; // <vec2 position, vec2 texCoords>
+uniform mat4 projection;
+uniform mat4 model;
 
 void main()
 {   
-   float x = -1.0f + float((gl_VertexID & 1) << 2);
-   float y = -1.0f + float((gl_VertexID & 2) << 1);
-   
-   texCoord.x = (x + 1.0f) * 0.5f;
-   texCoord.y = (y + 1.0f) * 0.5f;
-   
-   gl_Position = vec4(x, y, 1.0f, 1.0f);
+   texCoord = vertex.zw;
+   gl_Position = projection*model*vec4(vertex.xy, 0.0, 1.0);
 })";
 
 
@@ -78,37 +75,37 @@ void main()
 /////////////////////////
 
 /**
- * @brief PipelineFullscreen2D reserved structure.
+ * @brief PipelineParticle reserved structure.
  */
-struct Eng::PipelineFullscreen2D::Reserved
-{  
-   Eng::Shader vs;
-   Eng::Shader fs;
-   Eng::Program program;      
-   Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
+struct Eng::PipelineParticle::Reserved
+{
+    Eng::Shader vs;
+    Eng::Shader fs;
+    Eng::Program program;
+    Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
+    unsigned int particle;
 
-
-   /**
-    * Constructor. 
-    */
-   Reserved()
-   {}
+    /**
+     * Constructor.
+     */
+    Reserved()
+    {}
 };
 
 
 
 ////////////////////////////////////////
-// BODY OF CLASS PipelineFullscreen2D //
+// BODY OF CLASS PipelineParticle //
 ////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Constructor.
  */
-ENG_API Eng::PipelineFullscreen2D::PipelineFullscreen2D() : reserved(std::make_unique<Eng::PipelineFullscreen2D::Reserved>())
-{	
-   ENG_LOG_DETAIL("[+]");      
-   this->setProgram(reserved->program);
+ENG_API Eng::PipelineParticle::PipelineParticle() : reserved(std::make_unique<Eng::PipelineParticle::Reserved>())
+{
+    ENG_LOG_DETAIL("[+]");
+    this->setProgram(reserved->program);
 }
 
 
@@ -117,20 +114,20 @@ ENG_API Eng::PipelineFullscreen2D::PipelineFullscreen2D() : reserved(std::make_u
  * Constructor with name.
  * @param name node name
  */
-ENG_API Eng::PipelineFullscreen2D::PipelineFullscreen2D(const std::string &name) : Eng::Pipeline(name), reserved(std::make_unique<Eng::PipelineFullscreen2D::Reserved>())
-{	   
-   ENG_LOG_DETAIL("[+]");   
-   this->setProgram(reserved->program);
+ENG_API Eng::PipelineParticle::PipelineParticle(const std::string& name) : Eng::Pipeline(name), reserved(std::make_unique<Eng::PipelineParticle::Reserved>())
+{
+    ENG_LOG_DETAIL("[+]");
+    this->setProgram(reserved->program);
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Move constructor. 
+ * Move constructor.
  */
-ENG_API Eng::PipelineFullscreen2D::PipelineFullscreen2D(PipelineFullscreen2D &&other) : Eng::Pipeline(std::move(other)), reserved(std::move(other.reserved))
-{  
-   ENG_LOG_DETAIL("[M]");
+ENG_API Eng::PipelineParticle::PipelineParticle(PipelineParticle&& other) : Eng::Pipeline(std::move(other)), reserved(std::move(other.reserved))
+{
+    ENG_LOG_DETAIL("[M]");
 }
 
 
@@ -138,47 +135,71 @@ ENG_API Eng::PipelineFullscreen2D::PipelineFullscreen2D(PipelineFullscreen2D &&o
 /**
  * Destructor.
  */
-ENG_API Eng::PipelineFullscreen2D::~PipelineFullscreen2D()
-{	
-   ENG_LOG_DETAIL("[-]");
-   if (this->isInitialized())
-      free();
+ENG_API Eng::PipelineParticle::~PipelineParticle()
+{
+    ENG_LOG_DETAIL("[-]");
+    if (this->isInitialized())
+        free();
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Initializes this pipeline. 
+ * Initializes this pipeline.
  * @return TF
  */
-bool ENG_API Eng::PipelineFullscreen2D::init()
+bool ENG_API Eng::PipelineParticle::init()
 {
-   // Already initialized?
-   if (this->Eng::Managed::init() == false)
-      return false;
-   if (!this->isDirty())
-      return false;
+    // Already initialized?
+    if (this->Eng::Managed::init() == false)
+        return false;
+    if (!this->isDirty())
+        return false;
 
-   // Build:
-   reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs);
-   reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs);   
-   if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
-   {
-      ENG_LOG_ERROR("Unable to build fullscreen2D program");
-      return false;
-   }
-   this->setProgram(reserved->program);   
+    // Build:
+    reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs);
+    reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs);
+    if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
+    {
+        ENG_LOG_ERROR("Unable to build fullscreen2D program");
+        return false;
+    }
+    this->setProgram(reserved->program);
 
-   // Init dummy VAO:
-   if (reserved->vao.init() == false)
-   {
-      ENG_LOG_ERROR("Unable to init VAO for fullscreen2D");
-      return false;
-   }
+    // Init dummy VAO:
+    if (reserved->vao.init() == false)
+    {
+        ENG_LOG_ERROR("Unable to init VAO for fullscreen2D");
+        return false;
+    }
 
-   // Done: 
-   this->setDirty(false);
-   return true;
+
+
+
+
+    unsigned int VBO;
+    float particle_quad[] = {
+        0.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+
+        0.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 1.0f,
+        1.0f, 0.0f, 1.0f, 0.0f
+    };
+    glGenVertexArrays(1, &reserved->particle);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(reserved->particle);
+    // fill mesh buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(particle_quad), particle_quad, GL_STATIC_DRAW);
+    // set mesh attributes
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glBindVertexArray(0);
+    // Done: 
+    this->setDirty(false);
+    return true;
 }
 
 
@@ -187,60 +208,58 @@ bool ENG_API Eng::PipelineFullscreen2D::init()
  * Releases this pipeline.
  * @return TF
  */
-bool ENG_API Eng::PipelineFullscreen2D::free()
+bool ENG_API Eng::PipelineParticle::free()
 {
-   if (this->Eng::Managed::free() == false)
-      return false;
+    if (this->Eng::Managed::free() == false)
+        return false;
 
-   // Done:   
-   return true;
+    // Done:   
+    return true;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Main rendering method for the pipeline.  
+ * Main rendering method for the pipeline.
  * @param camera view camera
  * @param list list of renderables
  * @return TF
  */
-bool ENG_API Eng::PipelineFullscreen2D::render(const Eng::Texture &texture, const Eng::List &list)
-{	
-   // Safety net:
-   if (texture == Eng::Texture::empty || list == Eng::List::empty)
-   {
-      ENG_LOG_ERROR("Invalid params");
-      return false;
-   }
+bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, const Eng::List& list)
+{
+    // Safety net:
+    if (texture == Eng::Texture::empty || list == Eng::List::empty)
+    {
+        ENG_LOG_ERROR("Invalid params");
+        return false;
+    }
 
-   // Just to update the cache
-   this->Eng::Pipeline::render(list); 
+    // Just to update the cache
+    this->Eng::Pipeline::render(list);
 
-   // Lazy-loading:
-   if (this->isDirty())
-      if (!this->init())
-      {
-         ENG_LOG_ERROR("Unable to render (initialization failed)");
-         return false;
-      }
+    // Lazy-loading:
+    if (this->isDirty())
+        if (!this->init())
+        {
+            ENG_LOG_ERROR("Unable to render (initialization failed)");
+            return false;
+        }
 
-   // Apply program:
-   Eng::Program &program = getProgram();
-   if (program == Eng::Program::empty)
-   {
-      ENG_LOG_ERROR("Invalid program");
-      return false;
-   }   
-   program.render();     
-   texture.render(0);
-   
-   Eng::Base &eng = Eng::Base::getInstance();
-   Eng::Fbo::reset(eng.getWindowSize().x, eng.getWindowSize().y);   
+    // Apply program:
+    Eng::Program& program = getProgram();
+    if (program == Eng::Program::empty)
+    {
+        ENG_LOG_ERROR("Invalid program");
+        return false;
+    }
+    program.render();
+    texture.render(0);
+    program.setMat4("projection", glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 1.0f, 1000.0f));
+    program.setMat4("model", glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,-10.0f)));
+    glBindVertexArray(reserved->particle);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
-   // Smart trick:   
-   reserved->vao.render();
-   glDrawArrays(GL_TRIANGLES, 0, 3);
-  
-   // Done:   
-   return true;
+    // Done:   
+    return true;
 }
