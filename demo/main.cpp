@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
       // Main rendering:
       eng.clear();
       glm::mat4 pos(1.0f);
+      pos[3] = glm::vec4(0.0f, 0.0f, -10.0f,0.0f);
          particleEmitter.render(0U,(void*)&pos);
          //dfltPipe.render(camera, list);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);

@@ -140,7 +140,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     for (unsigned int i = 0; i < pReserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
         if (particle != NULL) {
-            respawnParticle(particle, glm::vec3(0.0f,0.0f,-10.0f));
+            respawnParticle(particle, position);
         }
     }
 
