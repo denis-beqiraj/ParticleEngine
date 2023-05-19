@@ -143,7 +143,6 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
     auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
-    // TODO(jan): This is the position in view space, it would probably be nice to do these calculations in world space
     glm::vec3 position = glm::vec3(renderData.position[3]);
 
     // Spawn new particles

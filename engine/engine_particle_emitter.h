@@ -10,6 +10,7 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	//////////
 	static ParticleEmitter empty;
 	struct RenderData {
+		glm::mat4 modelViewMat;
 		float dt;
 		glm::mat4 position;
 	};

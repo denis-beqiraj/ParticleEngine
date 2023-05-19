@@ -34,6 +34,7 @@ public: //
       meshes,
       trasparent,
       allmeshes,
+      particleemitters,
 
       // Terminator:
       last

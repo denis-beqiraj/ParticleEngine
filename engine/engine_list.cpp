@@ -37,12 +37,13 @@ struct Eng::List::Reserved
 {    
    std::vector<Eng::List::RenderableElem> renderableElem;   ///< List of rendering elements
    uint32_t nrOfLights;                                     ///< Number of lights in the list (lights come first)
-   uint32_t nrOfMeshes;                                     ///< Number of meshes in the list
+   uint32_t nrOfOpaqueMeshes;                               ///< Number of opaque meshes in the list
+   uint32_t nrOfTransparentMeshes;                          ///< Number of transparent meshes in the list
 
    /**
     * Constructor. 
     */
-   Reserved() : nrOfLights{ 0 }, nrOfMeshes{ 0 }
+   Reserved() : nrOfLights{ 0 }, nrOfOpaqueMeshes{ 0 }, nrOfTransparentMeshes{ 0 }
    {}
 };
 
@@ -101,7 +102,8 @@ void ENG_API Eng::List::reset()
 {	
    reserved->renderableElem.clear();
    reserved->nrOfLights = 0;
-   reserved->nrOfMeshes = 0;
+   reserved->nrOfOpaqueMeshes = 0;
+   reserved->nrOfTransparentMeshes = 0;
 }
 
 
@@ -183,12 +185,13 @@ bool ENG_API Eng::List::process(const Eng::Node &node, const glm::mat4 &prevMatr
    {
        if (dynamic_cast<const Eng::Mesh*>(&node)->getMaterial().getOpacity() >= 1.0f && !dynamic_cast<const Eng::Mesh*>(&node)->getMaterial().getTexture().getTrasparent()) 
        {
-           reserved->renderableElem.insert(reserved->renderableElem.begin() + reserved->nrOfLights, 1, re);
-           reserved->nrOfMeshes++;
+            reserved->renderableElem.insert(reserved->renderableElem.begin() + reserved->nrOfLights, 1, re);
+            reserved->nrOfOpaqueMeshes++;
        }
        else 
        {
-           reserved->renderableElem.push_back(re);
+            reserved->renderableElem.insert(reserved->renderableElem.begin() + reserved->nrOfLights + reserved->nrOfOpaqueMeshes, 1, re);
+            reserved->nrOfTransparentMeshes++;
        }
    }
 
@@ -229,13 +232,14 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
       /////////////////////
       case Pass::meshes: //
          startRange = reserved->nrOfLights;
-         endRange = reserved->nrOfMeshes+1;
+         endRange = startRange + reserved->nrOfOpaqueMeshes;
          break;
 
       /////////////////////////
       case Pass::trasparent: //
-          startRange = reserved->nrOfMeshes + 1;
-          std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.end(), [cameraMatrix](RenderableElem a, RenderableElem b) {
+          startRange = reserved->nrOfLights + reserved->nrOfOpaqueMeshes;
+          endRange = startRange + reserved->nrOfTransparentMeshes;
+          std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.begin() + endRange, [cameraMatrix](RenderableElem a, RenderableElem b) {
               return glm::length(a.matrix[3] - cameraMatrix[3]) < glm::length(b.matrix[3] - cameraMatrix[3]);
               });
           isTrasparent = true;
@@ -244,6 +248,11 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
       /////////////////////////
       case Pass::allmeshes: //
           startRange = reserved->nrOfLights;
+          endRange = startRange + reserved->nrOfOpaqueMeshes + reserved->nrOfTransparentMeshes;
+          break;
+
+      case Pass::particleemitters:
+          startRange = reserved->nrOfLights + reserved->nrOfOpaqueMeshes + reserved->nrOfTransparentMeshes;
           break;
    }
    if (isTrasparent) {
@@ -252,9 +261,15 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
    // Iterate through the range:
    for (size_t c = startRange; c < endRange; c++)
    {
+      // TODO(jan): renderdata should probably not be a member of particleemitter
+      // TODO(jan): pass delta time somehow
        RenderableElem& re = reserved->renderableElem.at(c);
-       glm::mat4 finalMatrix = cameraMatrix * re.matrix;
-       re.reference.get().render(0, &finalMatrix);
+       Eng::ParticleEmitter::RenderData renderData;
+       renderData.modelViewMat = cameraMatrix * re.matrix;
+       renderData.dt = 0.16f;
+       renderData.position = re.matrix;
+       //glm::mat4 finalMatrix = cameraMatrix * re.matrix;
+       re.reference.get().render(0, &renderData);
    }
    if (isTrasparent) {
        glDepthMask(true);

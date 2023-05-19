@@ -417,7 +417,7 @@ bool ENG_API Eng::PipelineDefault::render(const Eng::Camera &camera, const Eng::
       // Render meshes:
       list.render(viewMatrix, Eng::List::Pass::meshes);     
       list.render(viewMatrix, Eng::List::Pass::trasparent);
-
+      list.render(viewMatrix, Eng::List::Pass::particleemitters);
    }
 
    // Disable blending, in case we used it:
