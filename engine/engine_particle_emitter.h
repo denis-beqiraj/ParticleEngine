@@ -9,7 +9,10 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	public: //
 	//////////
 	static ParticleEmitter empty;
-
+	struct RenderData {
+		float dt;
+		glm::mat4 position;
+	};
 	// Const/dest:
 	ParticleEmitter(unsigned int maxParticles, unsigned int newParticlesPerFrame);
 	ParticleEmitter(ParticleEmitter&& other);

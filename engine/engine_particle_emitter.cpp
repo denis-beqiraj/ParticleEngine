@@ -132,9 +132,9 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
     Reserved* pReserved = reserved.get();
 
-    glm::mat4 modelViewMat = *(glm::mat4*)data;
+    auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
     // TODO(jan): This is the position in view space, it would probably be nice to do these calculations in world space
-    glm::vec3 position = glm::vec3(modelViewMat[3]);
+    glm::vec3 position = glm::vec3(renderData.position[3]);
 
     // Spawn new particles
     for (unsigned int i = 0; i < pReserved->newParticlesPerFrame; i++) {
@@ -143,9 +143,8 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
             respawnParticle(particle, position);
         }
     }
-
     // Update all particles
-    float dT = 1.0f / 30.0f; // TODO(jan): pass
+    float dT = renderData.dt; // TODO(jan): pass
     ParticleArrayNode* node = pReserved->particles;
     for (unsigned int i = 0; i < pReserved->maxParticles; i++) {
         if (!node->isFree) {
