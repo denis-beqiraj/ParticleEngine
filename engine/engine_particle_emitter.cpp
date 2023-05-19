@@ -126,12 +126,11 @@ Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() 
 
 void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm::vec3& position) const
 {
-    float random = ((rand() % 100) - 50) / 10.0f;
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
-    particle->position = position; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+    particle->position = position + glm::vec3(((float)rand() / RAND_MAX) * 2.0f, ((float)rand() / RAND_MAX) * 2.0f, ((float)rand() / RAND_MAX) * 2.0f); // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
     particle->life = 10.0f;
-    particle->velocity = glm::vec3(0.0f, 0.1f, 0.0f); // TODO(jan): calculate better initial velocity
+    particle->velocity = glm::vec3(0.0f, -0.1f, 0.0f); // TODO(jan): calculate better initial velocity
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,11 +203,10 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     for (const Particle& particle : reserved->particles) {
         glm::mat4 model(1.0f);
         model[3] = glm::vec4(particle.position,1.0f);
-        std::cout << glm::to_string(model[3])<<std::endl;
+        model = model * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+        //std::cout << glm::to_string(model[3])<<std::endl;
         reserved->particlePipe.setModel(model);
         reserved->particlePipe.render(reserved->texture.getDefault(true));
-
-        std::cout << "Particle rendered" << std::endl;
     }
 #endif
 
