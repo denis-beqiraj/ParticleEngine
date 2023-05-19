@@ -193,8 +193,9 @@ int main(int argc, char *argv[])
       list.process(root);
       
       // Main rendering:
-      eng.clear();      
-         particlePipe.render(tknot.get().getMaterial().getTexture(), list);
+      eng.clear();
+         dfltPipe.render(camera, list);
+         //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
