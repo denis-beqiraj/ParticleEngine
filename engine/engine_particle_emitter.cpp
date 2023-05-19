@@ -21,6 +21,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>  
 
+//#define PE_CUSTOM_CONTAINER
 
 Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(0, 0);
 
@@ -35,8 +36,12 @@ Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(0, 0);
  */
 struct Eng::ParticleEmitter::Reserved
 {
+#ifdef PE_CUSTOM_CONTAINER
     Eng::ParticleEmitter::ParticleArrayNode* particles;
     Eng::ParticleEmitter::ParticleArrayNode* particleArrayFreeListHead;
+#else
+    std::vector<Particle> particles;
+#endif
     unsigned int maxParticles;
     unsigned int newParticlesPerFrame;
     Eng::PipelineParticle particlePipe;
@@ -56,23 +61,26 @@ ENG_API Eng::ParticleEmitter::ParticleEmitter(unsigned int maxParticles, unsigne
 {
     ENG_LOG_DETAIL("[+]");
 
-    Reserved* pReserved = reserved.get();
+    reserved->maxParticles = maxParticles;
+    reserved->newParticlesPerFrame = newParticlesPerFrame;
 
-    pReserved->maxParticles = maxParticles;
-    pReserved->newParticlesPerFrame = newParticlesPerFrame;
-    pReserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
+#ifdef PE_CUSTOM_CONTAINER
+    reserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
 
     // Initialize sparse particle array with free list
-    pReserved->particleArrayFreeListHead = pReserved->particles;
-    ParticleArrayNode* currentNode = pReserved->particleArrayFreeListHead;
+    reserved->particleArrayFreeListHead = reserved->particles;
+    ParticleArrayNode* currentNode = reserved->particleArrayFreeListHead;
     for (unsigned int i = 0; i < maxParticles; i++) {
         currentNode->isFree = true;
         currentNode->nextFree = currentNode + 1;
         currentNode = currentNode->nextFree;
     }
 
-    ParticleArrayNode* lastNode = pReserved->particleArrayFreeListHead + maxParticles - 1;
+    ParticleArrayNode* lastNode = reserved->particleArrayFreeListHead + maxParticles - 1;
     lastNode->nextFree = NULL;
+#else
+    reserved->particles.reserve(maxParticles);
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,17 +104,22 @@ ENG_API Eng::ParticleEmitter::~ParticleEmitter()
 
 Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() const
 {
-    Reserved* pReserved = reserved.get();
-
-    if (pReserved->particleArrayFreeListHead != NULL) {
+#ifdef PE_CUSTOM_CONTAINER
+    if (reserved->particleArrayFreeListHead != NULL) {
         // Pop free list head
-        ParticleArrayNode* node = pReserved->particleArrayFreeListHead;
-        pReserved->particleArrayFreeListHead = node->nextFree;
+        ParticleArrayNode* node = reserved->particleArrayFreeListHead;
+        reserved->particleArrayFreeListHead = node->nextFree;
 
         node->isFree = false;
         node->particle = Particle();
         return &node->particle;
     }
+#else
+    if (reserved->particles.size() < reserved->maxParticles) {
+        reserved->particles.push_back(Particle());
+        return &reserved->particles[reserved->particles.size() - 1];
+    }
+#endif
 
     return NULL;
 }
@@ -130,29 +143,28 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm
  */
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
-    Reserved* pReserved = reserved.get();
-
     auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
     // TODO(jan): This is the position in view space, it would probably be nice to do these calculations in world space
     glm::vec3 position = glm::vec3(renderData.position[3]);
 
     // Spawn new particles
-    for (unsigned int i = 0; i < pReserved->newParticlesPerFrame; i++) {
+    for (unsigned int i = 0; i < reserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
         if (particle != NULL) {
             respawnParticle(particle, position);
         }
     }
     // Update all particles
-    float dT = renderData.dt; // TODO(jan): pass
-    ParticleArrayNode* node = pReserved->particles;
-    for (unsigned int i = 0; i < pReserved->maxParticles; i++) {
+    float dT = renderData.dt;
+#ifdef PE_CUSTOM_CONTAINER
+    ParticleArrayNode* node = reserved->particles;
+    for (unsigned int i = 0; i < reserved->maxParticles; i++) {
         if (!node->isFree) {
             node->particle.life -= dT;
             if (node->particle.life < 0.0f) {
                 node->isFree = true;
-                node->nextFree = pReserved->particleArrayFreeListHead;
-                pReserved->particleArrayFreeListHead = node;
+                node->nextFree = reserved->particleArrayFreeListHead;
+                reserved->particleArrayFreeListHead = node;
             } else {
                 node->particle.position -= node->particle.velocity * dT;
                 node->particle.color.a -= dT * 2.5f;
@@ -161,8 +173,9 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 
         node++;
     }
-    ParticleArrayNode* drawNode = pReserved->particles;
-    for (unsigned int i = 0; i < pReserved->maxParticles; i++) {
+
+    ParticleArrayNode* drawNode = reserved->particles;
+    for (unsigned int i = 0; i < reserved->maxParticles; i++) {
         if (!drawNode->isFree) {
             glm::mat4 model(1.0f);
             model[3] = glm::vec4(drawNode->particle.position,1.0f);
@@ -172,6 +185,33 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         }
         drawNode++;
     }
+#else
+    unsigned int particleIndex = 0;
+    while (particleIndex < reserved->particles.size()) {
+        Particle& particle = reserved->particles[particleIndex];
+        particle.life -= dT;
+        if (particle.life < 0.0f) {
+            reserved->particles[particleIndex] = reserved->particles[reserved->particles.size() - 1];
+            reserved->particles.resize(reserved->particles.size() - 1);
+        } else {
+            particle.position -= particle.velocity * dT;
+            particle.color.a -= dT * 2.5f;
+
+            particleIndex++;
+        }
+    }
+
+    for (const Particle& particle : reserved->particles) {
+        glm::mat4 model(1.0f);
+        model[3] = glm::vec4(particle.position,1.0f);
+        std::cout << glm::to_string(model[3])<<std::endl;
+        reserved->particlePipe.setModel(model);
+        reserved->particlePipe.render(reserved->texture.getDefault(true));
+
+        std::cout << "Particle rendered" << std::endl;
+    }
+#endif
+
     // Done:
     return true;
 }
