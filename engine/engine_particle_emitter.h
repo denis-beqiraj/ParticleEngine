@@ -14,8 +14,15 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		float dt;
 		glm::mat4 position;
 	};
+	struct Particle {
+		glm::vec3 position, velocity;
+		glm::vec4 color;
+		float life;
+
+		Particle() : position(0.0f), velocity(0.0f), color(1.0f), life(0.0f) {}
+	};
 	// Const/dest:
-	ParticleEmitter(unsigned int maxParticles, unsigned int newParticlesPerFrame);
+	ParticleEmitter(std::vector<Particle> particles, unsigned int newParticlesPerFrame);
 	ParticleEmitter(ParticleEmitter&& other);
 	ParticleEmitter(ParticleEmitter const&) = delete;
 	~ParticleEmitter();
@@ -30,14 +37,6 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	///////////
 	private: //
 	///////////
-
-	struct Particle {
-		glm::vec3 position, velocity;
-		glm::vec4 color;
-		float life;
-
-		Particle() : position(0.0f), velocity(0.0f), color(1.0f), life(0.0f) {}
-	};
 
 	struct ParticleArrayNode {
 		bool isFree;

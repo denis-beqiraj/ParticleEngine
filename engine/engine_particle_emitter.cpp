@@ -23,7 +23,7 @@
 
 //#define PE_CUSTOM_CONTAINER
 
-Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(0, 0);
+Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::vector<Particle>(), 0);
 
 
 
@@ -57,13 +57,13 @@ struct Eng::ParticleEmitter::Reserved
 /**
  * Constructor.
  */
-ENG_API Eng::ParticleEmitter::ParticleEmitter(unsigned int maxParticles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
+ENG_API Eng::ParticleEmitter::ParticleEmitter(std::vector<Particle> particles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
 {
     ENG_LOG_DETAIL("[+]");
 
-    reserved->maxParticles = maxParticles;
+    reserved->maxParticles = particles.size();
     reserved->newParticlesPerFrame = newParticlesPerFrame;
-
+    reserved->particles = particles;
 #ifdef PE_CUSTOM_CONTAINER
     reserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
 
@@ -78,8 +78,6 @@ ENG_API Eng::ParticleEmitter::ParticleEmitter(unsigned int maxParticles, unsigne
 
     ParticleArrayNode* lastNode = reserved->particleArrayFreeListHead + maxParticles - 1;
     lastNode->nextFree = NULL;
-#else
-    reserved->particles.reserve(maxParticles);
 #endif
 }
 
