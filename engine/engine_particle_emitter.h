@@ -22,9 +22,10 @@ class ENG_API ParticleEmitter final : public Eng::Node
 
 	// Operators:
 	void operator=(ParticleEmitter const&) = delete;
-
 	// Rendering methods:   
 	bool render(uint32_t value = 0, void* data = nullptr) const;
+
+	void setTexture(const Eng::Bitmap& sprite);
 
 	///////////
 	private: //

@@ -175,7 +175,9 @@ int main(int argc, char *argv[])
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
    Eng::ParticleEmitter particleEmitter(200, 1);
-
+   Eng::Bitmap sprite;
+   sprite.load("grass.dds");
+   particleEmitter.setTexture(sprite);
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -195,7 +197,7 @@ int main(int argc, char *argv[])
       eng.clear();
          Eng::ParticleEmitter::RenderData data;
          glm::mat4 pos(1.0f);
-         pos[3] = glm::vec4(0.0f, 0.0f, -10.0f,0.0f);
+         pos = glm::rotate(glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)), glm::radians(180.0f), glm::vec3(0, 0, 1));
          data.position = pos;
          data.dt = fpsFactor;
          particleEmitter.render(0U,(void*)&data);

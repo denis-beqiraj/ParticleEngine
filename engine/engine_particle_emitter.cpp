@@ -200,15 +200,20 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     }
 
     for (const Particle& particle : reserved->particles) {
-        glm::mat4 model(1.0f);
+        glm::mat4 model=renderData.position;
         model[3] = glm::vec4(particle.position,1.0f);
         model = model * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
         //std::cout << glm::to_string(model[3])<<std::endl;
         reserved->particlePipe.setModel(model);
-        reserved->particlePipe.render(reserved->texture.getDefault(true));
+        reserved->particlePipe.render(reserved->texture);
     }
 #endif
 
     // Done:
     return true;
+}
+
+void ENG_API Eng::ParticleEmitter::setTexture(const Eng::Bitmap& sprite)
+{
+    reserved->texture.load(sprite);
 }
