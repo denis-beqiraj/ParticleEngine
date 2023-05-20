@@ -143,8 +143,8 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
     auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
+    //THINGS TO DO IN COMPUTE SHADER
     glm::vec3 position = glm::vec3(renderData.position[3]);
-
     // Spawn new particles
     for (unsigned int i = 0; i < reserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
@@ -198,11 +198,10 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
             particleIndex++;
         }
     }
-
+    //THINGS TO DO WHEN DRAW IN FRAGMENT
     for (const Particle& particle : reserved->particles) {
         glm::mat4 model=renderData.position;
         model[3] = glm::vec4(particle.position,1.0f);
-        model = model * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
         //std::cout << glm::to_string(model[3])<<std::endl;
         reserved->particlePipe.setModel(model);
         reserved->particlePipe.render(reserved->texture);
