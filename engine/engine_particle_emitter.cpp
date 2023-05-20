@@ -200,6 +200,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     }
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(GL_FALSE);
     for (const Particle& particle : reserved->particles) {
         glm::mat4 model=renderData.position;
         model[3] = glm::vec4(particle.position,1.0f);
@@ -207,6 +208,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         reserved->particlePipe.setModel(model);
         reserved->particlePipe.render(reserved->texture);
     }
+    glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #endif
 
