@@ -142,8 +142,18 @@ int main(int argc, char *argv[])
    Eng::Ovo ovo; 
 
    std::reference_wrapper<Eng::Node> root = ovo.load("simple3dSceneWithTransp.ovo");
-
-
+   std::vector<Eng::ParticleEmitter::Particle> particles;
+   for (int i = 0; i < 200; i++) {
+       particles.push_back(Eng::ParticleEmitter::Particle());
+   }
+   {
+      Eng::Container& container = Eng::Container::getInstance();
+      Eng::ParticleEmitter particleEmitter(particles, 2);
+      particleEmitter.setName("Particle Emitter");
+      container.add(particleEmitter);
+      std::reference_wrapper<Eng::ParticleEmitter> _particleEmitter = container.getLastParticleEmitter();
+      root.get().addChild(_particleEmitter);
+   }
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -167,10 +177,6 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
-   std::vector<Eng::ParticleEmitter::Particle> particles;
-   for (int i = 0; i < 200; i++) {
-       particles.push_back(Eng::ParticleEmitter::Particle());
-   }
    Eng::ParticleEmitter particleEmitter(particles, 10);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
