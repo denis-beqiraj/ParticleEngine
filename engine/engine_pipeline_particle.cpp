@@ -65,7 +65,11 @@ out vec4 outFragment;
 
 void main()
 {
-   outFragment = texture(texture0, texCoord);   
+   vec4 particle=texture(texture0, texCoord);
+   if(particle.w<0.5f){
+      discard;
+   }
+   outFragment = particle;   
 })";
 
 

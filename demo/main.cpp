@@ -174,13 +174,13 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
-   Eng::ParticleEmitter particleEmitter(200, 1);
+   Eng::ParticleEmitter particleEmitter(2000, 10);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
    particleEmitter.setTexture(sprite);
    Eng::ParticleEmitter::RenderData data;
    glm::mat4 pos(1.0f);
-   pos = glm::rotate(glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)), glm::radians(180.0f), glm::vec3(0, 0, 1));
+   pos = glm::rotate(glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)), glm::radians(180.0f), glm::vec3(0, 0, 1))*glm::scale(glm::mat4(1.0f),glm::vec3(0.1f));
    while (eng.processEvents())
    {      
       auto start = timer.now();
