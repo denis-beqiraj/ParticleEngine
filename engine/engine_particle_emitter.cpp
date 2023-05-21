@@ -151,7 +151,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
     auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
     //THINGS TO DO IN COMPUTE SHADER
-    glm::vec3 position = glm::vec3(renderData.position[3]);
+    glm::vec3 position = glm::vec3(getMatrix()[3]);
     // Spawn new particles
     for (unsigned int i = 0; i < reserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
@@ -208,12 +208,15 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
-    for (const Particle& particle : reserved->particles) {
-        glm::mat4 model=renderData.position;
-        model[3] = glm::vec4(particle.currentPosition,1.0f);
-        //std::cout << glm::to_string(model[3])<<std::endl;
-        reserved->particlePipe.setModel(model);
-        reserved->particlePipe.render(reserved->texture);
+    for (int i = 0; i < reserved->particles.size();i++) {
+        if (reserved->particleUsed[i]) {
+            glm::mat4 model = renderData.modelViewMat;
+            model[3] = model[3] + glm::vec4(reserved->particles[i].currentPosition, 0.0f);
+            //std::cout << glm::to_string(model[3])<<std::endl;
+
+            reserved->particlePipe.setModel(model);
+            reserved->particlePipe.render(reserved->texture);
+        }
     }
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

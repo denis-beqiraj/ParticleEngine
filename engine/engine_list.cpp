@@ -266,8 +266,7 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
        RenderableElem& re = reserved->renderableElem.at(c);
        Eng::ParticleEmitter::RenderData renderData;
        renderData.modelViewMat = cameraMatrix * re.matrix;
-       renderData.dt = 0.16f;
-       renderData.position = re.matrix;
+       renderData.dt = 0.16f;//TODO GLOBAL DT
        //glm::mat4 finalMatrix = cameraMatrix * re.matrix;
        re.reference.get().render(0, &renderData);
    }

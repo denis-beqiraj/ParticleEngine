@@ -144,22 +144,14 @@ int main(int argc, char *argv[])
    std::reference_wrapper<Eng::Node> root = ovo.load("simple3dSceneWithTransp.ovo");
    std::vector<Eng::ParticleEmitter::Particle> particles;
    glm::mat4 pos(1.0f);
-   pos = glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.05f));
-   for (int i = 0; i < 200; i++) {
+   pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
+   for (int i = 0; i < 2000; i++) {
        Eng::ParticleEmitter::Particle particle;
-       particle.initPosition = pos[3];
-       particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f);
-       particle.initAcceleration = glm::vec3(0.0f, -2.8f, 0.0f);
-       particle.initLife = ((float)rand() / RAND_MAX) * 2.0f;
+       particle.initPosition = glm::vec3(0.0f);
+       particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, 0.0f);
+       particle.initAcceleration = glm::vec3(0.0f, 2.8f, 0.0f);
+       particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
        particles.push_back(particle);
-   }
-   {
-      Eng::Container& container = Eng::Container::getInstance();
-      Eng::ParticleEmitter particleEmitter(particles, 2);
-      particleEmitter.setName("Particle Emitter");
-      container.add(particleEmitter);
-      std::reference_wrapper<Eng::ParticleEmitter> _particleEmitter = container.getLastParticleEmitter();
-      root.get().addChild(_particleEmitter);
    }
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
@@ -184,10 +176,13 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
-   Eng::ParticleEmitter particleEmitter(particles, 10);
+   Eng::ParticleEmitter particleEmitter(particles, 50);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
    particleEmitter.setTexture(sprite);
+   particleEmitter.setMatrix(pos);
+   root.get().addChild(particleEmitter);
+
    Eng::ParticleEmitter::RenderData data;
    while (eng.processEvents())
    {      
@@ -208,7 +203,7 @@ int main(int argc, char *argv[])
       eng.clear();
          data.position = pos;
          data.dt = fpsFactor;
-         particleEmitter.render(0U,(void*)&data);
+         //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
