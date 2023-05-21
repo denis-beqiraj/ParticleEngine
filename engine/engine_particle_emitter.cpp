@@ -127,7 +127,7 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
     particle->position = position + glm::vec3(0.0f, 0.0f, 0.0f); // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
-    particle->life = 10.0f;
+    particle->life = 2.0f;
     particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
     particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
 }
