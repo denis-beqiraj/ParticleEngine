@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
    particleEmitter.setTexture(sprite);
    Eng::ParticleEmitter::RenderData data;
    glm::mat4 pos(1.0f);
-   pos = glm::rotate(glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)), glm::radians(180.0f), glm::vec3(0, 0, 1))*glm::scale(glm::mat4(1.0f),glm::vec3(0.05f));
+   pos = glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f))*glm::scale(glm::mat4(1.0f),glm::vec3(0.05f));
    while (eng.processEvents())
    {      
       auto start = timer.now();

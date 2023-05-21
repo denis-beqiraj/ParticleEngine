@@ -125,10 +125,11 @@ Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() 
 void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm::vec3& position) const
 {
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
-    particle->position = position + glm::vec3(((float)rand() / RAND_MAX) * 2.0f, ((float)rand() / RAND_MAX) * 2.0f, ((float)rand() / RAND_MAX) * 2.0f); // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+    particle->position = position + glm::vec3(0.0f, 0.0f, 0.0f); // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
     particle->life = 10.0f;
-    particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 1.0f, ((float)rand() / RAND_MAX) * 1.0f, ((float)rand() / RAND_MAX) * 1.0f); // TODO(jan): calculate better initial velocity
+    particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
+    particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +191,9 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
             reserved->particles[particleIndex] = reserved->particles[reserved->particles.size() - 1];
             reserved->particles.resize(reserved->particles.size() - 1);
         } else {
-            particle.position -= particle.velocity * dT;
+            particle.position = particle.position + particle.velocity*dT;
+            particle.velocity = particle.velocity + particle.acceleration*dT;
+
             particle.color.a -= dT * 2.5f;
 
             particleIndex++;
