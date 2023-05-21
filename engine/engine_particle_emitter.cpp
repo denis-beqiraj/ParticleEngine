@@ -41,6 +41,7 @@ struct Eng::ParticleEmitter::Reserved
     Eng::ParticleEmitter::ParticleArrayNode* particleArrayFreeListHead;
 #else
     std::vector<Particle> particles;
+    std::vector<bool> particleUsed;
 #endif
     unsigned int maxParticles;
     unsigned int newParticlesPerFrame;
@@ -64,6 +65,9 @@ ENG_API Eng::ParticleEmitter::ParticleEmitter(std::vector<Particle> particles, u
     reserved->maxParticles = particles.size();
     reserved->newParticlesPerFrame = newParticlesPerFrame;
     reserved->particles = particles;
+    for (int i = 0; i < particles.size(); i++) {
+        reserved->particleUsed.push_back(false);
+    }
 #ifdef PE_CUSTOM_CONTAINER
     reserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
 
@@ -113,23 +117,27 @@ Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() 
         return &node->particle;
     }
 #else
-    if (reserved->particles.size() < reserved->maxParticles) {
-        reserved->particles.push_back(Particle());
-        return &reserved->particles[reserved->particles.size() - 1];
+    for (int i = 0; i < reserved->particles.size(); i++) {
+        if (!reserved->particleUsed[i]) {
+            reserved->particleUsed[i] = true;
+            return &reserved->particles[i];
+        }
     }
 #endif
 
     return NULL;
 }
 
-void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle, const glm::vec3& position) const
+void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle) const
 {
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
-    particle->position = position + glm::vec3(0.0f, 0.0f, 0.0f); // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+    particle->currentPosition = particle->initPosition; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
     particle->life = 2.0f;
-    particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
-    particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
+    particle->currentVelocity = particle->initVelocity; // TODO(jan): calculate better initial velocity
+    //particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
+    particle->currentAcceleration = particle->initAcceleration; // TODO(jan): calculate better initial 
+    //particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +156,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     for (unsigned int i = 0; i < reserved->newParticlesPerFrame; i++) {
         Particle* particle = getFreeParticle();
         if (particle != NULL) {
-            respawnParticle(particle, position);
+            respawnParticle(particle);
         }
     }
     // Update all particles
@@ -188,23 +196,21 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         Particle& particle = reserved->particles[particleIndex];
         particle.life -= dT;
         if (particle.life < 0.0f) {
-            reserved->particles[particleIndex] = reserved->particles[reserved->particles.size() - 1];
-            reserved->particles.resize(reserved->particles.size() - 1);
+            reserved->particleUsed[particleIndex] = false;
         } else {
-            particle.position = particle.position + particle.velocity*dT;
-            particle.velocity = particle.velocity + particle.acceleration*dT;
+            particle.currentPosition = particle.currentPosition + particle.currentVelocity*dT;
+            particle.currentVelocity = particle.currentVelocity + particle.currentAcceleration*dT;
 
             particle.color.a -= dT * 2.5f;
-
-            particleIndex++;
         }
+        particleIndex++;
     }
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
     for (const Particle& particle : reserved->particles) {
         glm::mat4 model=renderData.position;
-        model[3] = glm::vec4(particle.position,1.0f);
+        model[3] = glm::vec4(particle.currentPosition,1.0f);
         //std::cout << glm::to_string(model[3])<<std::endl;
         reserved->particlePipe.setModel(model);
         reserved->particlePipe.render(reserved->texture);

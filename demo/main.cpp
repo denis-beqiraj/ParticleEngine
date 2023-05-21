@@ -143,8 +143,14 @@ int main(int argc, char *argv[])
 
    std::reference_wrapper<Eng::Node> root = ovo.load("simple3dSceneWithTransp.ovo");
    std::vector<Eng::ParticleEmitter::Particle> particles;
+   glm::mat4 pos(1.0f);
+   pos = glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.05f));
    for (int i = 0; i < 200; i++) {
-       particles.push_back(Eng::ParticleEmitter::Particle());
+       Eng::ParticleEmitter::Particle particle;
+       particle.initPosition = pos[3];
+       particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f);
+       particle.initAcceleration = glm::vec3(0.0f, -2.8f, 0.0f);
+       particles.push_back(particle);
    }
    {
       Eng::Container& container = Eng::Container::getInstance();
@@ -182,8 +188,6 @@ int main(int argc, char *argv[])
    sprite.load("grass.dds");
    particleEmitter.setTexture(sprite);
    Eng::ParticleEmitter::RenderData data;
-   glm::mat4 pos(1.0f);
-   pos = glm::translate(pos, glm::vec3(0.0f, 0.0f, -2.0f))*glm::scale(glm::mat4(1.0f),glm::vec3(0.05f));
    while (eng.processEvents())
    {      
       auto start = timer.now();
