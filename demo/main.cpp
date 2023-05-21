@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
    eng.setMouseButtonCallback(mouseButtonCallback);
    eng.setMouseScrollCallback(mouseScrollCallback);
    eng.setKeyboardCallback(keyboardCallback);
-     
+   eng.initImgui();
 
    /////////////////
    // Loading scene:   
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
    std::vector<Eng::ParticleEmitter::Particle> particles;
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   for (int i = 0; i < 2000; i++) {
+   for (int i = 0; i < 200; i++) {
        Eng::ParticleEmitter::Particle particle;
        particle.initPosition = glm::vec3(0.0f);
        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, 0.0f);
@@ -208,6 +208,9 @@ int main(int argc, char *argv[])
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
+         eng.getImgui()->newFrame();
+         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
+         eng.getImgui()->render();
       eng.swap();    
       
       auto stop = timer.now();

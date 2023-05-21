@@ -13,11 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\imgui">
-      <UniqueIdentifier>{e82f7609-c261-4ad4-b982-62fe4170a311}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\imgui">
-      <UniqueIdentifier>{3c13c847-6050-43bf-9c7f-22bfbe667900}</UniqueIdentifier>
+      <UniqueIdentifier>{06302862-0173-43a6-94a6-4cea936304ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{0796dfcc-1bfc-4953-9844-5fce8a26f228}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="..\dependencies\imgui\include\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_imgui.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="..\dependencies\imgui\include\imstb_truetype.h">
       <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_imgui.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -109,8 +109,7 @@ namespace Eng {
    #include "engine_pipeline_default.h"
    #include "engine_pipeline_particle.h"
 
-
-
+   #include "engine_imgui.h"
 ///////////////////////
 // MAIN ENGINE CLASS //
 ///////////////////////
@@ -160,9 +159,10 @@ public: //
    bool setMouseCursorCallback(MouseCursorCallback cb);
    bool setMouseButtonCallback(MouseButtonCallback cb);
    bool setMouseScrollCallback(MouseScrollCallback cb);
+   bool initImgui();
    // Compatibility:
    bool isBindlessSupported() const;
-
+   std::shared_ptr<Eng::ImGuiEngine> getImgui();
 
 ///////////
 private: //

@@ -21,10 +21,6 @@
    // C/C++:
    #include <sstream>   
 
-   #include "imgui.h"
-   #include "imgui_impl_glfw.h"
-   #include "imgui_impl_opengl3.h"
-
 /////////////////////////
 // RESERVED STRUCTURES //
 /////////////////////////
@@ -48,7 +44,7 @@ struct Eng::Base::Reserved
    Eng::Base::MouseCursorCallback mouseCursorCallback;
    Eng::Base::MouseButtonCallback mouseButtonCallback;
    Eng::Base::MouseScrollCallback mouseScrollCallback;
-
+   std::shared_ptr<Eng::ImGuiEngine> imgui;
 
    /**
     * Constructor
@@ -544,6 +540,12 @@ bool ENG_API Eng::Base::setMouseScrollCallback(MouseScrollCallback cb)
    return true;
 }
 
+bool ENG_API Eng::Base::initImgui()
+{
+    reserved->imgui = std::make_shared<Eng::ImGuiEngine>(reserved->window);
+    return true;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -553,4 +555,9 @@ bool ENG_API Eng::Base::setMouseScrollCallback(MouseScrollCallback cb)
 bool ENG_API Eng::Base::isBindlessSupported() const
 { 
    return reserved->bindlessSupportFlag;
+}
+
+std::shared_ptr<Eng::ImGuiEngine ENG_API> Eng::Base::getImgui()
+{
+    return std::shared_ptr<Eng::ImGuiEngine>();
 }

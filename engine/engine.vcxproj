@@ -105,6 +105,7 @@
     <ClCompile Include="engine_container.cpp" />
     <ClCompile Include="engine_ebo.cpp" />
     <ClCompile Include="engine_fbo.cpp" />
+    <ClCompile Include="engine_imgui.cpp" />
     <ClCompile Include="engine_light.cpp" />
     <ClCompile Include="engine_list.cpp" />
     <ClCompile Include="engine_log.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="engine_container.h" />
     <ClInclude Include="engine_ebo.h" />
     <ClInclude Include="engine_fbo.h" />
+    <ClInclude Include="engine_imgui.h" />
     <ClInclude Include="engine_light.h" />
     <ClInclude Include="engine_list.h" />
     <ClInclude Include="engine_log.h" />
