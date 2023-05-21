@@ -28,7 +28,7 @@ void ENG_API Eng::ImGuiEngine::newFrame()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Hello, world!");
+    ImGui::Begin("Particle System");
 }
 
 void ENG_API Eng::ImGuiEngine::newText(std::string text)
