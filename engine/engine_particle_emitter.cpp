@@ -133,7 +133,7 @@ void ENG_API Eng::ParticleEmitter::respawnParticle(Particle* particle) const
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
     particle->currentPosition = particle->initPosition; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
     particle->color = glm::vec4(rColor, rColor, rColor, 1.0f);
-    particle->life = 2.0f;
+    particle->currentLife = particle->initLife;
     particle->currentVelocity = particle->initVelocity; // TODO(jan): calculate better initial velocity
     //particle->velocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
     particle->currentAcceleration = particle->initAcceleration; // TODO(jan): calculate better initial 
@@ -194,8 +194,8 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     unsigned int particleIndex = 0;
     while (particleIndex < reserved->particles.size()) {
         Particle& particle = reserved->particles[particleIndex];
-        particle.life -= dT;
-        if (particle.life < 0.0f) {
+        particle.currentLife -= dT;
+        if (particle.currentLife < 0.0f) {
             reserved->particleUsed[particleIndex] = false;
         } else {
             particle.currentPosition = particle.currentPosition + particle.currentVelocity*dT;

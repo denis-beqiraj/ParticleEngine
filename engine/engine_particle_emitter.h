@@ -18,9 +18,10 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		glm::vec3 initPosition, initVelocity,initAcceleration;
 		glm::vec3 currentPosition, currentVelocity, currentAcceleration;
 		glm::vec4 color;
-		float life;
+		float initLife;
+		float currentLife;
 
-		Particle() : initPosition(0.0f), initVelocity(0.0f), initAcceleration(1.0f), currentPosition(0.0f), currentVelocity(0.0f), currentAcceleration(1.0f), color(1.0f), life(0.0f) {}
+		Particle() : initPosition(0.0f), initVelocity(0.0f), initAcceleration(1.0f), currentPosition(0.0f), currentVelocity(0.0f), currentAcceleration(1.0f), color(1.0f), initLife(0.0f), currentLife(0.0f) {}
 	};
 	// Const/dest:
 	ParticleEmitter(std::vector<Particle> particles, unsigned int newParticlesPerFrame);

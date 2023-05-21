@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
        particle.initPosition = pos[3];
        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 2.0f - 1.0f, 2.0f, 0.0f);
        particle.initAcceleration = glm::vec3(0.0f, -2.8f, 0.0f);
+       particle.initLife = ((float)rand() / RAND_MAX) * 2.0f;
        particles.push_back(particle);
    }
    {
