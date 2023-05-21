@@ -57,7 +57,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\dependencies\glm\include;..\dependencies\glfw\include;..\dependencies\glew\include;..\dependencies\dds\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\dependencies\glm\include;..\dependencies\glfw\include;..\dependencies\glew\include;..\dependencies\imgui\include;..\dependencies\dds\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -92,6 +92,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\dependencies\imgui\include\imgui.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_demo.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_draw.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_tables.cpp" />
+    <ClCompile Include="..\dependencies\imgui\include\imgui_widgets.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="engine_bitmap.cpp" />
     <ClCompile Include="engine_camera.cpp" />
@@ -121,6 +128,14 @@
     <ClCompile Include="engine_vbo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\dependencies\imgui\include\imconfig.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imgui.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imgui_impl_glfw.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imgui_internal.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imstb_rectpack.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imstb_textedit.h" />
+    <ClInclude Include="..\dependencies\imgui\include\imstb_truetype.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="engine_bitmap.h" />
     <ClInclude Include="engine_camera.h" />

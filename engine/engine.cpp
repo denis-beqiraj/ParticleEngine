@@ -21,7 +21,9 @@
    // C/C++:
    #include <sstream>   
 
-   
+   #include "imgui.h"
+   #include "imgui_impl_glfw.h"
+   #include "imgui_impl_opengl3.h"
 
 /////////////////////////
 // RESERVED STRUCTURES //
@@ -394,7 +396,6 @@ bool ENG_API Eng::Base::clear()
 {
    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
    // Done:
    return true;
 }

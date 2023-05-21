@@ -108,7 +108,7 @@ namespace Eng {
    #include "engine_pipeline_fullscreen2d.h"
    #include "engine_pipeline_default.h"
    #include "engine_pipeline_particle.h"
-   
+
 
 
 ///////////////////////
@@ -160,7 +160,6 @@ public: //
    bool setMouseCursorCallback(MouseCursorCallback cb);
    bool setMouseButtonCallback(MouseButtonCallback cb);
    bool setMouseScrollCallback(MouseScrollCallback cb);
-
    // Compatibility:
    bool isBindlessSupported() const;
 

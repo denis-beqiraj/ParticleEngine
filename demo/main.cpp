@@ -18,9 +18,10 @@
    #include <iostream>
    #include <chrono>
 
-   #include <engine_particle_emitter.h>
 
-
+   #include "imgui.h"
+   #include "imgui_impl_glfw.h"
+   #include "imgui_impl_opengl3.h"
 //////////   
 // VARS //
 //////////
@@ -109,7 +110,6 @@ void keyboardCallback(int key, int scancode, int action, int mods)
 }
 
 
-
 //////////
 // MAIN //
 //////////
@@ -182,7 +182,6 @@ int main(int argc, char *argv[])
    particleEmitter.setTexture(sprite);
    particleEmitter.setMatrix(pos);
    root.get().addChild(particleEmitter);
-
    Eng::ParticleEmitter::RenderData data;
    while (eng.processEvents())
    {      
