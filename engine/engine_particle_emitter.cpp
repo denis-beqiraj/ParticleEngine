@@ -175,26 +175,13 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         drawNode++;
     }
 #else
-    unsigned int particleIndex = 0;
-    while (particleIndex < reserved->particles->size()) {
-        Particle& particle = reserved->particles->at(particleIndex);
-        particle.currentLife -= dT;
-        if (particle.currentLife < particle.minLife) {
-            respawnParticle(&particle);
-        } else {
-            particle.currentPosition = particle.currentPosition + particle.currentVelocity*dT;
-            particle.currentVelocity = particle.currentVelocity + particle.currentAcceleration*dT;
-
-            particle.color.a -= dT * 2.5f;
-        }
-        particleIndex++;
-    }
+    auto particleSsbo= reserved->computePipe.render();
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
     for (int i = 0; i < reserved->particles->size();i++) {
         glm::mat4 model = renderData.modelViewMat;
-        model = glm::translate(model,glm::vec3(reserved->particles->at(i).currentPosition));
+        model = glm::translate(model,glm::vec3(particleSsbo[i].currentPosition));
         //std::cout << glm::to_string(model[3])<<std::endl;
 
         reserved->particlePipe.setModel(model);

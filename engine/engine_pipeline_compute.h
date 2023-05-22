@@ -36,7 +36,7 @@ public: //
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
 	bool convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles);
-	bool render();
+	Eng::PipelineCompute::ComputeParticle* render();
 
 	// Managed:
 	bool init() override;

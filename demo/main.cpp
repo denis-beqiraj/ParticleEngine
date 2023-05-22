@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
    particles=std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>();
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   createParticles(50);
+   createParticles(10000);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -219,14 +219,6 @@ int main(int argc, char *argv[])
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
-         eng.getImgui()->newFrame();
-         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
-         eng.getImgui()->newBar("Number particles", value, 1.0f, 10000.0f);
-         if (currentValue != value) {
-             createParticles(value);
-         }
-         currentValue = value;
-         eng.getImgui()->render();
       eng.swap();    
 
       auto stop = timer.now();
