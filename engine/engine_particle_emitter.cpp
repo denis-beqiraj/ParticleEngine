@@ -44,6 +44,7 @@ struct Eng::ParticleEmitter::Reserved
 #endif
     Eng::PipelineParticle particlePipe;
     Eng::Texture texture;
+    Eng::PipelineCompute computePipe;
 
 };
 
@@ -58,8 +59,10 @@ struct Eng::ParticleEmitter::Reserved
 ENG_API Eng::ParticleEmitter::ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
 {
     ENG_LOG_DETAIL("[+]");
-
-    reserved->particles = particles;
+    if (particles) {
+        reserved->particles = particles;
+        reserved->computePipe.convert(reserved->particles);
+    }
 #ifdef PE_CUSTOM_CONTAINER
     reserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
 
@@ -199,8 +202,8 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     }
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //reserved->computePipe.render();
 #endif
-
     // Done:
     return true;
 }

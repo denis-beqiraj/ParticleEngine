@@ -41,8 +41,13 @@ layout (local_size_x = 8) in;
    
 struct ParticleCompute 
 {    
-   vec4 position;     
-   vec4 color;
+	vec4 initPosition, initVelocity, initAcceleration;
+	vec4 currentPosition, currentVelocity, currentAcceleration;
+	vec4 color;
+	float initLife;
+	float currentLife;
+	float minLife;
+	float pos1;
 };
    
 layout(std430, binding=0) buffer ParticleData
@@ -64,7 +69,7 @@ void main()
    if(i>particles.length()){
     return;
    }
-   particles[i].position.x=12.0f;
+   particles[i].initPosition.x=12.0f;
 }
 )";
 
@@ -227,23 +232,22 @@ bool ENG_API Eng::PipelineCompute::render()
     program.wait();
     auto particles=(Eng::PipelineCompute::ComputeParticle*)reserved->particles.map(Eng::Ssbo::Mapping::read);
     if (particles) {
-        std::cout << particles[0].position.x;
+        std::cout << particles[0].initPosition.x;
     }
     reserved->particles.unmap();
     // Done:   
     return true;
 }
 
-bool ENG_API Eng::PipelineCompute::convert(std::vector<Eng::ParticleEmitter::Particle> particles)
+bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles)
 {
     std::vector<Eng::PipelineCompute::ComputeParticle> particleSsbovs;
-    for (auto particle : particles) {
+    for (auto particle : *particles) {
         Eng::PipelineCompute::ComputeParticle pSsbos;
-        pSsbos.position = glm::vec4(1.0f);
+        pSsbos.initPosition = glm::vec4(particle.initPosition,0.0f);
         pSsbos.color = glm::vec4(1.0f);
         particleSsbovs.push_back(pSsbos);
     }
-    std::cout << particleSsbovs.size()<<std::endl;
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
     return true;
 }

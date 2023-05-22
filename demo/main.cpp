@@ -35,7 +35,6 @@
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
    Eng::PipelineFullscreen2D full2dPipe;
-   Eng::PipelineCompute computePipe;
 
 ///////////////
 // CALLBACKS //
