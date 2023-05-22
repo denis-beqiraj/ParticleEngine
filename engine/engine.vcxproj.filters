@@ -126,6 +126,12 @@
     <ClCompile Include="engine_imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine_pipeline_compute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_ssbo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine.h">
@@ -234,6 +240,12 @@
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="engine_imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_pipeline_compute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_ssbo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

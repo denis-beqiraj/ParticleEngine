@@ -110,6 +110,21 @@ namespace Eng {
    #include "engine_pipeline_particle.h"
 
    #include "engine_imgui.h"
+
+
+////////////////
+// ALIGNEMENT //
+////////////////
+
+#ifdef _WINDOWS
+#define ENG_ALIGNED(x) __declspec(align(x))
+#else // Under linux
+#define ENG_ALIGNED(x) __attribute__ ((aligned(x)))
+#endif
+#define ENG_ALIGNED_TYPE(t,x) t ENG_ALIGNED(x)
+   #include "engine_pipeline_compute.h"
+   #include "engine_ssbo.h"
+
 ///////////////////////
 // MAIN ENGINE CLASS //
 ///////////////////////

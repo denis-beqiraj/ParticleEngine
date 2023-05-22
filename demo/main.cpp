@@ -35,6 +35,7 @@
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
    Eng::PipelineFullscreen2D full2dPipe;
+   Eng::PipelineCompute computePipe;
 
 ///////////////
 // CALLBACKS //
@@ -216,7 +217,8 @@ int main(int argc, char *argv[])
          particleEmitter.setNewParticlesPerFrame(value);
          eng.getImgui()->render();
       eng.swap();    
-      
+      //computePipe.render(particles);
+
       auto stop = timer.now();
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
