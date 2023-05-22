@@ -230,3 +230,8 @@ void ENG_API Eng::ParticleEmitter::setTexture(const Eng::Bitmap& sprite)
 {
     reserved->texture.load(sprite);
 }
+
+void ENG_API Eng::ParticleEmitter::setNewParticlesPerFrame(unsigned int newParticlesPerFrame)
+{
+    reserved->newParticlesPerFrame = newParticlesPerFrame;
+}

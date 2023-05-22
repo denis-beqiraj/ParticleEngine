@@ -31,6 +31,11 @@ void ENG_API Eng::ImGuiEngine::newFrame()
     ImGui::Begin("Particle System");
 }
 
+void ENG_API Eng::ImGuiEngine::newBar(std::string type, float& value, float min, float max)
+{
+    ImGui::SliderFloat(type.c_str(), &value, min, max);
+}
+
 void ENG_API Eng::ImGuiEngine::newText(std::string text)
 {
     ImGui::Text(text.c_str());               // Display some text (you can use a format strings too)

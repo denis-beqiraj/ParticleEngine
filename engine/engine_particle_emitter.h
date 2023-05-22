@@ -36,6 +36,8 @@ class ENG_API ParticleEmitter final : public Eng::Node
 
 	void setTexture(const Eng::Bitmap& sprite);
 
+	void setNewParticlesPerFrame(unsigned int newParticlesPerFrame);
+
 	///////////
 	private: //
 	///////////

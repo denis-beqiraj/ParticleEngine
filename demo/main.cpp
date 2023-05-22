@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
    std::vector<Eng::ParticleEmitter::Particle> particles;
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   for (int i = 0; i < 200; i++) {
+   for (int i = 0; i < 2000; i++) {
        Eng::ParticleEmitter::Particle particle;
        particle.initPosition = glm::vec3(0.0f);
        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, 0.0f);
@@ -183,6 +183,8 @@ int main(int argc, char *argv[])
    particleEmitter.setMatrix(pos);
    root.get().addChild(particleEmitter);
    Eng::ParticleEmitter::RenderData data;
+   float value;
+   value = 50.0f;
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -210,6 +212,8 @@ int main(int argc, char *argv[])
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
+         eng.getImgui()->newBar("Number particles", value, 1.0f, 250.0f);
+         particleEmitter.setNewParticlesPerFrame(value);
          eng.getImgui()->render();
       eng.swap();    
       
