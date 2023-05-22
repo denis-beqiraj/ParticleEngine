@@ -109,7 +109,20 @@ void keyboardCallback(int key, int scancode, int action, int mods)
       case 'W': if (action == 0) dfltPipe.setWireframe(!dfltPipe.isWireframe()); break;         
    }
 }
+std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles;
 
+void createParticles(int maxParticles) {
+    particles->clear();
+    for (int i = 0; i < maxParticles; i++) {
+        Eng::ParticleEmitter::Particle particle;
+        particle.initPosition = glm::vec3(0.0f);
+        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, ((float)rand() / RAND_MAX) * 8.0f - 4.0f);
+        particle.initAcceleration = glm::vec3(0.0f, 2.8f, 0.0f);
+        particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
+        particle.minLife = -((float)rand() / RAND_MAX) * 50.0f;
+        particles->push_back(particle);
+    }
+}
 
 //////////
 // MAIN //
@@ -143,17 +156,10 @@ int main(int argc, char *argv[])
    Eng::Ovo ovo; 
 
    std::reference_wrapper<Eng::Node> root = ovo.load("simple3dSceneWithTransp.ovo");
-   std::vector<Eng::ParticleEmitter::Particle> particles;
+   particles=std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>();
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   for (int i = 0; i < 2000; i++) {
-       Eng::ParticleEmitter::Particle particle;
-       particle.initPosition = glm::vec3(0.0f);
-       particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, 0.0f);
-       particle.initAcceleration = glm::vec3(0.0f, 2.8f, 0.0f);
-       particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
-       particles.push_back(particle);
-   }
+   createParticles(50);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -186,7 +192,9 @@ int main(int argc, char *argv[])
    Eng::ParticleEmitter::RenderData data;
    float value;
    value = 50.0f;
-   computePipe.convert(particles);
+   float currentValue;
+   currentValue = value;
+   //computePipe.convert(particles);
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -212,7 +220,14 @@ int main(int argc, char *argv[])
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
-         computePipe.render();
+         eng.getImgui()->newFrame();
+         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
+         eng.getImgui()->newBar("Number particles", value, 1.0f, 10000.0f);
+         if (currentValue != value) {
+             createParticles(value);
+         }
+         currentValue = value;
+         eng.getImgui()->render();
       eng.swap();    
 
       auto stop = timer.now();

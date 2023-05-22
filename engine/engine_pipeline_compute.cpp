@@ -61,7 +61,7 @@ void main()
 {   
    // Pixel coordinates:
    uint i = gl_GlobalInvocationID.x;
-   if(i>2000){
+   if(i>particles.length()){
     return;
    }
    particles[i].position.x=12.0f;
