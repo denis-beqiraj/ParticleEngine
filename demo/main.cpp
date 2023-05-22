@@ -225,6 +225,7 @@ int main(int argc, char *argv[])
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       fpsFactor = 1.0f / fps;
+      std::cout << fps<<std::endl;
       // std::cout << "fps: " << fps << std::endl;
    }
    std::cout << "Leaving main loop..." << std::endl;
