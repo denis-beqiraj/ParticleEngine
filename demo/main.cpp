@@ -186,6 +186,7 @@ int main(int argc, char *argv[])
    Eng::ParticleEmitter::RenderData data;
    float value;
    value = 50.0f;
+   computePipe.convert(particles);
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -211,13 +212,8 @@ int main(int argc, char *argv[])
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
-         eng.getImgui()->newFrame();
-         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
-         eng.getImgui()->newBar("Number particles", value, 1.0f, 250.0f);
-         particleEmitter.setNewParticlesPerFrame(value);
-         eng.getImgui()->render();
+         computePipe.render();
       eng.swap();    
-      //computePipe.render(particles);
 
       auto stop = timer.now();
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;

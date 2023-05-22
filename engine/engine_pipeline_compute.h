@@ -30,7 +30,8 @@ public: //
 	void setModel(glm::mat4 model);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
-	bool render(std::vector<Eng::ParticleEmitter::Particle> particles);
+	bool convert(std::vector<Eng::ParticleEmitter::Particle> particles);
+	bool render();
 
 	// Managed:
 	bool init() override;
