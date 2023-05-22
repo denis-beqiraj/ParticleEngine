@@ -41,8 +41,13 @@ layout (local_size_x = 8) in;
    
 struct ParticleCompute 
 {    
-   vec4 position;     
-   vec4 color;
+	vec4 initPosition, initVelocity, initAcceleration;
+	vec4 currentPosition, currentVelocity, currentAcceleration;
+	vec4 color;
+	float initLife;
+	float currentLife;
+	float minLife;
+	float pos1;
 };
    
 layout(std430, binding=0) buffer ParticleData
@@ -50,6 +55,16 @@ layout(std430, binding=0) buffer ParticleData
    ParticleCompute particles[];     
 };   
 
+uint rng_state;
+
+uint rand()
+{
+    // Xorshift algorithm from George Marsaglia's paper
+    rng_state ^= (rng_state << 13);
+    rng_state ^= (rng_state >> 17);
+    rng_state ^= (rng_state << 5);
+    return rng_state;
+}
 
 
 
@@ -59,12 +74,29 @@ layout(std430, binding=0) buffer ParticleData
 
 void main()
 {   
+   
    // Pixel coordinates:
    uint i = gl_GlobalInvocationID.x;
-   if(i>2000){
+   rng_state=i;
+   if(i>particles.length()){
     return;
    }
-   particles[i].position.x=12.0f;
+    float dT=0.28;
+    particles[i].currentLife -= dT;
+    if (particles[i].currentLife < particles[i].minLife) {
+        float rColor = 0.5f + ((rand() % 100) / 100.0f);
+        particles[i].currentPosition = particles[i].initPosition; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+        particles[i].currentLife = particles[i].initLife;
+        particles[i].currentVelocity = particles[i].initVelocity; // TODO(jan): calculate better initial velocity
+        //particle->velocity = vec3(((float)rand() * (1.0 / 4294967296.0)) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
+        particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
+        //particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
+    } else {
+        particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
+        particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
+
+        particles[i].color.a -= dT * 2.5f;
+    }
 }
 )";
 
@@ -204,7 +236,7 @@ void ENG_API Eng::PipelineCompute::setModel(glm::mat4 model)
  * @param list list of renderables
  * @return TF
  */
-bool ENG_API Eng::PipelineCompute::render()
+Eng::PipelineCompute::ComputeParticle ENG_API* Eng::PipelineCompute::render()
 {
 
     // Lazy-loading:
@@ -212,38 +244,40 @@ bool ENG_API Eng::PipelineCompute::render()
         if (!this->init())
         {
             ENG_LOG_ERROR("Unable to render (initialization failed)");
-            return false;
         }
     // Apply program:
     Eng::Program& program = getProgram();
     if (program == Eng::Program::empty)
     {
         ENG_LOG_ERROR("Invalid program");
-        return false;
     }
     program.render();
     reserved->particles.render(0);
     program.compute(256); // 8 is the hard-coded size of the workgroup
     program.wait();
     auto particles=(Eng::PipelineCompute::ComputeParticle*)reserved->particles.map(Eng::Ssbo::Mapping::read);
-    if (particles) {
-        std::cout << particles[0].position.x;
-    }
     reserved->particles.unmap();
     // Done:   
-    return true;
+    return particles;
 }
 
-bool ENG_API Eng::PipelineCompute::convert(std::vector<Eng::ParticleEmitter::Particle> particles)
+bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles)
 {
     std::vector<Eng::PipelineCompute::ComputeParticle> particleSsbovs;
-    for (auto particle : particles) {
+    for (auto particle : *particles) {
         Eng::PipelineCompute::ComputeParticle pSsbos;
-        pSsbos.position = glm::vec4(1.0f);
-        pSsbos.color = glm::vec4(1.0f);
+        pSsbos.initPosition = glm::vec4(particle.initPosition,0.0f);
+        pSsbos.currentPosition = glm::vec4(particle.currentPosition, 0.0f);
+        pSsbos.initVelocity = glm::vec4(particle.initVelocity, 0.0f);
+        pSsbos.currentVelocity = glm::vec4(particle.currentVelocity, 0.0f);
+        pSsbos.initAcceleration = glm::vec4(particle.initAcceleration, 0.0f);
+        pSsbos.currentAcceleration = glm::vec4(particle.currentAcceleration, 0.0f);
+        pSsbos.initLife = particle.initLife;
+        pSsbos.currentLife = particle.currentLife;
+        pSsbos.minLife = particle.minLife;
+        pSsbos.color = particle.color;
         particleSsbovs.push_back(pSsbos);
     }
-    std::cout << particleSsbovs.size()<<std::endl;
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
     return true;
 }

@@ -19,8 +19,13 @@ public: //
 	//////////
 	ENG_ALIGNED_TYPE(struct, 16) ComputeParticle
 	{
-		glm::vec4 position;
+		glm::vec4 initPosition, initVelocity, initAcceleration;
+		glm::vec4 currentPosition, currentVelocity, currentAcceleration;
 		glm::vec4 color;
+		float initLife;
+		float currentLife;
+		float minLife;
+		float pos1;
 	};
 	   // Const/dest:
 	PipelineCompute();
@@ -30,8 +35,8 @@ public: //
 	void setModel(glm::mat4 model);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
-	bool convert(std::vector<Eng::ParticleEmitter::Particle> particles);
-	bool render();
+	bool convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles);
+	Eng::PipelineCompute::ComputeParticle* render();
 
 	// Managed:
 	bool init() override;

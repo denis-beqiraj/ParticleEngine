@@ -20,11 +20,11 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		glm::vec4 color;
 		float initLife;
 		float currentLife;
-
+		float minLife;
 		Particle() : initPosition(0.0f), initVelocity(0.0f), initAcceleration(1.0f), currentPosition(0.0f), currentVelocity(0.0f), currentAcceleration(1.0f), color(1.0f), initLife(0.0f), currentLife(0.0f) {}
 	};
 	// Const/dest:
-	ParticleEmitter(std::vector<Particle> particles, unsigned int newParticlesPerFrame);
+	ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles, unsigned int newParticlesPerFrame);
 	ParticleEmitter(ParticleEmitter&& other);
 	ParticleEmitter(ParticleEmitter const&) = delete;
 	~ParticleEmitter();
@@ -35,8 +35,6 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	bool render(uint32_t value = 0, void* data = nullptr) const;
 
 	void setTexture(const Eng::Bitmap& sprite);
-
-	void setNewParticlesPerFrame(unsigned int newParticlesPerFrame);
 
 	///////////
 	private: //

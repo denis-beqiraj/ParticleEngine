@@ -32,10 +32,9 @@ public: //
 	bool init() override;
 	bool free() override;
 
-
-	/////////////
+/////////////
 protected: //
-	/////////////
+/////////////
 
 	   // Reserved:
 	struct Reserved;

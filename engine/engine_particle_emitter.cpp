@@ -23,7 +23,7 @@
 
 //#define PE_CUSTOM_CONTAINER
 
-Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::vector<Particle>(), 0);
+Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::shared_ptr<std::vector<Particle>>(), 0);
 
 
 
@@ -40,13 +40,11 @@ struct Eng::ParticleEmitter::Reserved
     Eng::ParticleEmitter::ParticleArrayNode* particles;
     Eng::ParticleEmitter::ParticleArrayNode* particleArrayFreeListHead;
 #else
-    std::vector<Particle> particles;
-    std::vector<bool> particleUsed;
+    std::shared_ptr<std::vector<Particle>> particles;
 #endif
-    unsigned int maxParticles;
-    unsigned int newParticlesPerFrame;
     Eng::PipelineParticle particlePipe;
     Eng::Texture texture;
+    Eng::PipelineCompute computePipe;
 
 };
 
@@ -58,15 +56,12 @@ struct Eng::ParticleEmitter::Reserved
 /**
  * Constructor.
  */
-ENG_API Eng::ParticleEmitter::ParticleEmitter(std::vector<Particle> particles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
+ENG_API Eng::ParticleEmitter::ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
 {
     ENG_LOG_DETAIL("[+]");
-
-    reserved->maxParticles = particles.size();
-    reserved->newParticlesPerFrame = newParticlesPerFrame;
-    reserved->particles = particles;
-    for (int i = 0; i < particles.size(); i++) {
-        reserved->particleUsed.push_back(false);
+    if (particles) {
+        reserved->particles = particles;
+        reserved->computePipe.convert(reserved->particles);
     }
 #ifdef PE_CUSTOM_CONTAINER
     reserved->particles = (ParticleArrayNode*)malloc(maxParticles * sizeof(ParticleArrayNode));
@@ -117,12 +112,7 @@ Eng::ParticleEmitter::Particle ENG_API* Eng::ParticleEmitter::getFreeParticle() 
         return &node->particle;
     }
 #else
-    for (int i = 0; i < reserved->particles.size(); i++) {
-        if (!reserved->particleUsed[i]) {
-            reserved->particleUsed[i] = true;
-            return &reserved->particles[i];
-        }
-    }
+
 #endif
 
     return NULL;
@@ -153,12 +143,6 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     //THINGS TO DO IN COMPUTE SHADER
     glm::vec3 position = glm::vec3(getMatrix()[3]);
     // Spawn new particles
-    for (unsigned int i = 0; i < reserved->newParticlesPerFrame; i++) {
-        Particle* particle = getFreeParticle();
-        if (particle != NULL) {
-            respawnParticle(particle);
-        }
-    }
     // Update all particles
     float dT = renderData.dt;
 #ifdef PE_CUSTOM_CONTAINER
@@ -191,37 +175,22 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         drawNode++;
     }
 #else
-    unsigned int particleIndex = 0;
-    while (particleIndex < reserved->particles.size()) {
-        Particle& particle = reserved->particles[particleIndex];
-        particle.currentLife -= dT;
-        if (particle.currentLife < 0.0f) {
-            reserved->particleUsed[particleIndex] = false;
-        } else {
-            particle.currentPosition = particle.currentPosition + particle.currentVelocity*dT;
-            particle.currentVelocity = particle.currentVelocity + particle.currentAcceleration*dT;
-
-            particle.color.a -= dT * 2.5f;
-        }
-        particleIndex++;
-    }
+    auto particleSsbo= reserved->computePipe.render();
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
-    for (int i = 0; i < reserved->particles.size();i++) {
-        if (reserved->particleUsed[i]) {
-            glm::mat4 model = renderData.modelViewMat;
-            model[3] = model[3] + glm::vec4(reserved->particles[i].currentPosition, 0.0f);
-            //std::cout << glm::to_string(model[3])<<std::endl;
+    for (int i = 0; i < reserved->particles->size();i++) {
+        glm::mat4 model = renderData.modelViewMat;
+        model = glm::translate(model,glm::vec3(particleSsbo[i].currentPosition));
+        //std::cout << glm::to_string(model[3])<<std::endl;
 
-            reserved->particlePipe.setModel(model);
-            reserved->particlePipe.render(reserved->texture);
-        }
+        reserved->particlePipe.setModel(model);
+        reserved->particlePipe.render(reserved->texture);
     }
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //reserved->computePipe.render();
 #endif
-
     // Done:
     return true;
 }
@@ -229,9 +198,4 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 void ENG_API Eng::ParticleEmitter::setTexture(const Eng::Bitmap& sprite)
 {
     reserved->texture.load(sprite);
-}
-
-void ENG_API Eng::ParticleEmitter::setNewParticlesPerFrame(unsigned int newParticlesPerFrame)
-{
-    reserved->newParticlesPerFrame = newParticlesPerFrame;
 }
