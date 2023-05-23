@@ -189,7 +189,7 @@ bool ENG_API Eng::Ssbo::create(uint64_t size, const void* data)
     // Fill it:		              
     const GLuint oglId = this->getOglHandle();
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, oglId);
-    glBufferStorage(GL_SHADER_STORAGE_BUFFER, size, data, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, size, data,  GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
     GLenum err;
     while((err = glGetError()) != GL_NO_ERROR) {
