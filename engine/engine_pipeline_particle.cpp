@@ -30,7 +30,7 @@
  */
 static const std::string pipeline_vs_3 = R"(
 
-layout(std430, binding=0) buffer ParticleTransforms
+layout(std430, binding=1) buffer ParticleTransforms
 {
     mat4 wTms[];
 };

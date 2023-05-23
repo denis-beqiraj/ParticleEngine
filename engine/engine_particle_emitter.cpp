@@ -98,7 +98,6 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
-    reserved->computePipe.getMatricesSsbo()->render(0);
     reserved->particlePipe.setModel(renderData.modelViewMat);
     reserved->particlePipe.render(reserved->texture, reserved->particles->size());
     glDepthMask(GL_TRUE);
