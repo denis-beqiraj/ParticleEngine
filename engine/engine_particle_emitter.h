@@ -35,6 +35,7 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	bool render(uint32_t value = 0, void* data = nullptr) const;
 
 	void setTexture(const Eng::Bitmap& sprite);
+	void setProjection(glm::mat4 projection);
 
 	///////////
 	private: //

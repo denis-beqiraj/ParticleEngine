@@ -186,6 +186,7 @@ int main(int argc, char *argv[])
    sprite.load("grass.dds");
    particleEmitter.setTexture(sprite);
    particleEmitter.setMatrix(pos);
+   particleEmitter.setProjection(camera.getProjMatrix());
    root.get().addChild(particleEmitter);
    Eng::ParticleEmitter::RenderData data;
    float value;

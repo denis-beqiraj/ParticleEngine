@@ -91,6 +91,7 @@ struct Eng::PipelineParticle::Reserved
     Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
     unsigned int particle;
     glm::mat4 model;
+    glm::mat4 projection;
 
     /**
      * Constructor.
@@ -230,6 +231,11 @@ void ENG_API Eng::PipelineParticle::setModel(glm::mat4 model)
     reserved->model = model;
 }
 
+void ENG_API Eng::PipelineParticle::setProjection(glm::mat4 projection)
+{
+    reserved->projection = projection;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Main rendering method for the pipeline.
@@ -263,7 +269,7 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, unsigned
     }
     program.render();
     texture.render(0);
-    program.setMat4("projection", glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 1.0f, 1000.0f));
+    program.setMat4("projection", reserved->projection);
     program.setMat4("model", reserved->model);
     glBindVertexArray(reserved->particle);
     //glDrawArrays(GL_TRIANGLES, 0, 6);

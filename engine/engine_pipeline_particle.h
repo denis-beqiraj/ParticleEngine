@@ -24,6 +24,7 @@ public: //
 	PipelineParticle(PipelineParticle const&) = delete;
 	virtual ~PipelineParticle();
 	void setModel(glm::mat4 model);
+	void setProjection(glm::mat4 projection);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
 	bool render(const Eng::Texture& texture, unsigned int particleCount);

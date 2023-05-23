@@ -111,3 +111,8 @@ void ENG_API Eng::ParticleEmitter::setTexture(const Eng::Bitmap& sprite)
 {
     reserved->texture.load(sprite);
 }
+
+void ENG_API Eng::ParticleEmitter::setProjection(glm::mat4 projection)
+{
+    reserved->particlePipe.setProjection(projection);
+}
