@@ -158,7 +158,11 @@ int main(int argc, char *argv[])
    particles=std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>();
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   createParticles(1000000);
+   float value;
+   value = 50.0f;
+   float currentValue;
+   currentValue = value;
+   createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -189,10 +193,6 @@ int main(int argc, char *argv[])
    particleEmitter.setProjection(camera.getProjMatrix());
    root.get().addChild(particleEmitter);
    Eng::ParticleEmitter::RenderData data;
-   float value;
-   value = 50.0f;
-   float currentValue;
-   currentValue = value;
    //computePipe.convert(particles);
    while (eng.processEvents())
    {      
@@ -221,7 +221,12 @@ int main(int argc, char *argv[])
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
-         eng.getImgui()->newBar("Number particles", value, 1.0f, 250.0f);
+         eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f);
+         if (currentValue != value) {
+             createParticles(value);
+             particleEmitter.setParticles(particles);
+         }
+         currentValue = value;
          eng.getImgui()->render();
       eng.swap();    
 

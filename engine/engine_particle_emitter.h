@@ -36,6 +36,7 @@ class ENG_API ParticleEmitter final : public Eng::Node
 
 	void setTexture(const Eng::Bitmap& sprite);
 	void setProjection(glm::mat4 projection);
+	void setParticles(std::shared_ptr<std::vector<Particle>> particles);
 
 	///////////
 	private: //

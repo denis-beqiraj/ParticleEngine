@@ -116,3 +116,9 @@ void ENG_API Eng::ParticleEmitter::setProjection(glm::mat4 projection)
 {
     reserved->particlePipe.setProjection(projection);
 }
+
+void ENG_API Eng::ParticleEmitter::setParticles(std::shared_ptr<std::vector<Particle>> particles)
+{
+    reserved->particles = particles;
+    reserved->computePipe.convert(reserved->particles);
+}
