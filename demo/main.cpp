@@ -115,7 +115,7 @@ void createParticles(int maxParticles) {
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec3(0.0f);
-        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -2.0f, ((float)rand() / RAND_MAX) * 8.0f - 4.0f);
+        particle.initVelocity = glm::vec3(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -((float)rand() / RAND_MAX)*2, ((float)rand() / RAND_MAX) * 8.0f - 4.0f);
         particle.initAcceleration = glm::vec3(0.0f, 2.8f, 0.0f);
         particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
         particle.minLife = -((float)rand() / RAND_MAX) * 50.0f;

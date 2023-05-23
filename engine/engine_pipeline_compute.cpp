@@ -18,8 +18,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-
-
 /////////////
 // SHADERS //
 /////////////
@@ -28,10 +26,13 @@
 /**
  * Default pipeline vertex shader.
  */
+
+static const std::string LOCAL_SIZE = "8";
+
 static const std::string pipeline_cs = R"(
 
 // This is the (hard-coded) workgroup size:
-layout (local_size_x = 32) in;
+layout (local_size_x = )"+LOCAL_SIZE+R"() in;
 
 
 
@@ -125,7 +126,7 @@ struct Eng::PipelineCompute::Reserved
     Eng::Shader cs;
     Eng::Program program;
     Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
-    unsigned int particle;
+    unsigned int particleSize;
     glm::mat4 model;
     Eng::Ssbo particles;
     Eng::Ssbo particleMatrices;
@@ -268,7 +269,7 @@ void ENG_API Eng::PipelineCompute::render()
     program.render();
     reserved->particles.render(0);
     reserved->particleMatrices.render(1);
-    program.compute(256); // 8 is the hard-coded size of the workgroup
+    program.compute(reserved->particleSize); // 8 is the hard-coded size of the workgroup
     program.wait();
 }
 
@@ -290,10 +291,10 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
         particleSsbovs.push_back(pSsbos);
     }
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
-
     std::vector<glm::mat4> particleMatricesSsbovs;
     particleMatricesSsbovs.resize(particleSsbovs.size(), glm::mat4(1.0f));
     reserved->particleMatrices.create(particleSsbovs.size() * sizeof(glm::mat4), particleMatricesSsbovs.data());
+    reserved->particleSize = glm::pow(2, glm::ceil(glm::log(particles->size()) / glm::log(2))) /std::stoi(LOCAL_SIZE);
     return true;
 }
 
