@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
    particles=std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>();
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   createParticles(10000);
+   createParticles(9000);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 0.0f;
-   Eng::ParticleEmitter particleEmitter(particles, 50);
+   Eng::ParticleEmitter particleEmitter(particles);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
    particleEmitter.setTexture(sprite);
@@ -219,13 +219,16 @@ int main(int argc, char *argv[])
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
+         eng.getImgui()->newFrame();
+         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
+         eng.getImgui()->newBar("Number particles", value, 1.0f, 250.0f);
+         eng.getImgui()->render();
       eng.swap();    
 
       auto stop = timer.now();
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       fpsFactor = 1.0f / fps;
-      std::cout << fps<<std::endl;
       // std::cout << "fps: " << fps << std::endl;
    }
    std::cout << "Leaving main loop..." << std::endl;

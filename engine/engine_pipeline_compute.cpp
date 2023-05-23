@@ -31,7 +31,7 @@
 static const std::string pipeline_cs = R"(
 
 // This is the (hard-coded) workgroup size:
-layout (local_size_x = 8) in;
+layout (local_size_x = 32) in;
 
 
 

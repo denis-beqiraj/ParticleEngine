@@ -23,7 +23,7 @@
 
 //#define PE_CUSTOM_CONTAINER
 
-Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::shared_ptr<std::vector<Particle>>(), 0);
+Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::shared_ptr<std::vector<Particle>>());
 
 
 
@@ -56,7 +56,7 @@ struct Eng::ParticleEmitter::Reserved
 /**
  * Constructor.
  */
-ENG_API Eng::ParticleEmitter::ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles, unsigned int newParticlesPerFrame) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
+ENG_API Eng::ParticleEmitter::ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles) : reserved(std::make_unique<Eng::ParticleEmitter::Reserved>())
 {
     ENG_LOG_DETAIL("[+]");
     if (particles) {
