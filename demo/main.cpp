@@ -176,7 +176,6 @@ int main(int argc, char *argv[])
    Eng::Camera camera;
    camera.setProjMatrix(glm::perspective(glm::radians(45.0f), eng.getWindowSize().x / (float) eng.getWindowSize().y, 1.0f, 1000.0f));      
    
-  
    /////////////
    // Main loop:
    std::cout << "Entering main loop..." << std::endl;      
