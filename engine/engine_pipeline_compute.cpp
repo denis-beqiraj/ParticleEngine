@@ -252,11 +252,13 @@ void ENG_API Eng::PipelineCompute::render()
 {
 
     // Lazy-loading:
-    if (this->isDirty())
+    if (this->isDirty()) {
         if (!this->init())
         {
             ENG_LOG_ERROR("Unable to render (initialization failed)");
         }
+    }
+
     // Apply program:
     Eng::Program& program = getProgram();
     if (program == Eng::Program::empty)
@@ -268,11 +270,6 @@ void ENG_API Eng::PipelineCompute::render()
     reserved->particleMatrices.render(1);
     program.compute(256); // 8 is the hard-coded size of the workgroup
     program.wait();
-    //auto particles = (glm::mat4*)reserved->particleMatrices.map(Eng::Ssbo::Mapping::read);
-    //reserved->particles.unmap();
-    //reserved->particleMatrices.unmap();
-    // Done:
-    //return particles;
 }
 
 bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles)

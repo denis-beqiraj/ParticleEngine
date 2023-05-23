@@ -49,9 +49,6 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		};
 	};
 
-	Particle* getFreeParticle() const;
-	void respawnParticle(Particle* particle) const;
-
 	// Reserved:
 	struct Reserved;
 	std::unique_ptr<Reserved> reserved;

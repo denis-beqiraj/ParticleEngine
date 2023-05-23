@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
    particles=std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>();
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
-   createParticles(9000);
+   createParticles(90000);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       fpsFactor = 1.0f / fps;
-      // std::cout << "fps: " << fps << std::endl;
+      std::cout << "fps: " << fps << std::endl;
    }
    std::cout << "Leaving main loop..." << std::endl;
 
