@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <engine_ssbo.h>
 
 
  /**
@@ -36,11 +37,13 @@ public: //
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
 	bool convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles);
-	Eng::PipelineCompute::ComputeParticle* render();
+	void render();
 
 	// Managed:
 	bool init() override;
 	bool free() override;
+
+	Eng::Ssbo* getMatricesSsbo();
 
 
 	/////////////

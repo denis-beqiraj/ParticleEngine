@@ -175,18 +175,26 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
         drawNode++;
     }
 #else
-    auto particleSsbo= reserved->computePipe.render();
+    //auto particleSsbo = reserved->computePipe.render();
+    reserved->computePipe.render();
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
+#if 0
     for (int i = 0; i < reserved->particles->size();i++) {
-        glm::mat4 model = renderData.modelViewMat;
-        model = glm::translate(model,glm::vec3(particleSsbo[i].currentPosition));
+        //glm::mat4 model = renderData.modelViewMat;
+        //model = glm::translate(model,glm::vec3(particleSsbo[i].currentPosition));
+        glm::mat4 model = renderData.modelViewMat * particleSsbo[i];
         //std::cout << glm::to_string(model[3])<<std::endl;
 
         reserved->particlePipe.setModel(model);
         reserved->particlePipe.render(reserved->texture);
     }
+#else
+    reserved->computePipe.getMatricesSsbo()->render(0);
+    reserved->particlePipe.setModel(renderData.modelViewMat);
+    reserved->particlePipe.render(reserved->texture, reserved->particles->size());
+#endif
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //reserved->computePipe.render();

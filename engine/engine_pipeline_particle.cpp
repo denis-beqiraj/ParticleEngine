@@ -28,7 +28,12 @@
 /**
  * Default pipeline vertex shader.
  */
-static const std::string pipeline_vs = R"(
+static const std::string pipeline_vs_3 = R"(
+
+layout(std430, binding=0) buffer ParticleTransforms
+{
+    mat4 wTms[];
+};
 
 // Out:
 out vec2 texCoord;
@@ -39,7 +44,7 @@ uniform mat4 model;
 void main()
 {   
    texCoord = vertex.zw;
-   gl_Position = projection*model*vec4(vertex.xy, 0.0, 1.0);
+   gl_Position = projection*model*wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
 })";
 
 
@@ -47,7 +52,7 @@ void main()
 /**
  * Default pipeline fragment shader.
  */
-static const std::string pipeline_fs = R"(
+static const std::string pipeline_fs_3 = R"(
    
 // Uniform:
 #ifdef ENG_BINDLESS_SUPPORTED
@@ -159,8 +164,8 @@ bool ENG_API Eng::PipelineParticle::init()
         return false;
 
     // Build:
-    reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs);
-    reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs);
+    reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs_3);
+    reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs_3);
     if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
     {
         ENG_LOG_ERROR("Unable to build fullscreen2D program");
@@ -232,7 +237,7 @@ void ENG_API Eng::PipelineParticle::setModel(glm::mat4 model)
  * @param list list of renderables
  * @return TF
  */
-bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture)
+bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, unsigned int particleCount)
 {
     // Safety net:
     if (texture == Eng::Texture::empty)
@@ -261,7 +266,8 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture)
     program.setMat4("projection", glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 1.0f, 1000.0f));
     program.setMat4("model", reserved->model);
     glBindVertexArray(reserved->particle);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particleCount);
     glBindVertexArray(0);
 
     // Done:   

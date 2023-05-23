@@ -52,8 +52,13 @@ struct ParticleCompute
    
 layout(std430, binding=0) buffer ParticleData
 {     
-   ParticleCompute particles[];     
-};   
+   ParticleCompute particles[];
+};
+
+layout(std430, binding=1) buffer ParticleTransforms
+{
+    mat4 wTms[];
+};
 
 uint rng_state;
 
@@ -97,6 +102,12 @@ void main()
 
         particles[i].color.a -= dT * 2.5f;
     }
+
+    wTms[i] = 
+        mat4(vec4(1.0, 0.0, 0.0, 0.0),
+             vec4(0.0, 1.0, 0.0, 0.0),
+             vec4(0.0, 0.0, 1.0, 0.0),
+             vec4(particles[i].currentPosition).xyz, 1.0);
 }
 )";
 
@@ -117,6 +128,7 @@ struct Eng::PipelineCompute::Reserved
     unsigned int particle;
     glm::mat4 model;
     Eng::Ssbo particles;
+    Eng::Ssbo particleMatrices;
     
     /**
      * Constructor.
@@ -236,7 +248,7 @@ void ENG_API Eng::PipelineCompute::setModel(glm::mat4 model)
  * @param list list of renderables
  * @return TF
  */
-Eng::PipelineCompute::ComputeParticle ENG_API* Eng::PipelineCompute::render()
+void ENG_API Eng::PipelineCompute::render()
 {
 
     // Lazy-loading:
@@ -253,12 +265,14 @@ Eng::PipelineCompute::ComputeParticle ENG_API* Eng::PipelineCompute::render()
     }
     program.render();
     reserved->particles.render(0);
+    reserved->particleMatrices.render(1);
     program.compute(256); // 8 is the hard-coded size of the workgroup
     program.wait();
-    auto particles=(Eng::PipelineCompute::ComputeParticle*)reserved->particles.map(Eng::Ssbo::Mapping::read);
-    reserved->particles.unmap();
-    // Done:   
-    return particles;
+    //auto particles = (glm::mat4*)reserved->particleMatrices.map(Eng::Ssbo::Mapping::read);
+    //reserved->particles.unmap();
+    //reserved->particleMatrices.unmap();
+    // Done:
+    //return particles;
 }
 
 bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles)
@@ -279,5 +293,13 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
         particleSsbovs.push_back(pSsbos);
     }
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
+
+    std::vector<glm::mat4> particleMatricesSsbovs;
+    particleMatricesSsbovs.resize(particleSsbovs.size(), glm::mat4(1.0f));
+    reserved->particleMatrices.create(particleSsbovs.size() * sizeof(glm::mat4), particleMatricesSsbovs.data());
     return true;
+}
+
+Eng::Ssbo ENG_API* Eng::PipelineCompute::getMatricesSsbo() {
+    return &reserved->particleMatrices;
 }

@@ -191,6 +191,11 @@ bool ENG_API Eng::Ssbo::create(uint64_t size, const void* data)
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, oglId);
     glBufferStorage(GL_SHADER_STORAGE_BUFFER, size, data, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
+    GLenum err;
+    while((err = glGetError()) != GL_NO_ERROR) {
+        ENG_LOG_ERROR("ssbo creation failed: %i", err);
+    }
+
     // Done:
     reserved->size = size;
     return true;
@@ -215,7 +220,14 @@ void ENG_API* Eng::Ssbo::map(Eng::Ssbo::Mapping mapping)
     case Mapping::write: bufMask = GL_MAP_WRITE_BIT; break;
     }
     bufMask |= GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-    return glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, reserved->size, bufMask);
+    void* result = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, reserved->size, bufMask);
+
+    GLenum err;
+    while((err = glGetError()) != GL_NO_ERROR) {
+        ENG_LOG_ERROR("ssbo mapping failed: %i", err);
+    }
+
+    return result;
 }
 
 

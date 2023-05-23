@@ -28,7 +28,7 @@
 /**
  * Default pipeline vertex shader.
  */
-static const std::string pipeline_vs = R"(
+static const std::string pipeline_vs_1 = R"(
 
 // Out:
 out vec2 texCoord;
@@ -50,7 +50,7 @@ void main()
 /**
  * Default pipeline fragment shader.
  */
-static const std::string pipeline_fs = R"(
+static const std::string pipeline_fs_1 = R"(
    
 // Uniform:
 #ifdef ENG_BINDLESS_SUPPORTED
@@ -160,8 +160,8 @@ bool ENG_API Eng::PipelineFullscreen2D::init()
       return false;
 
    // Build:
-   reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs);
-   reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs);   
+   reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs_1);
+   reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs_1);   
    if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
    {
       ENG_LOG_ERROR("Unable to build fullscreen2D program");
