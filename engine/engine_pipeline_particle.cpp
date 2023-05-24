@@ -36,17 +36,72 @@ layout(std430, binding=1) buffer ParticleTransforms
 };
 
 // Out:
-out vec2 texCoord;
+//out vec2 texCoord;
+
+// In:
 layout (location = 0) in vec4 vertex; // <vec2 position, vec2 texCoords>
+
+// Uniforms:
 uniform mat4 projection;
 uniform mat4 model;
 
 void main()
-{   
-   texCoord = vertex.zw;
-   gl_Position = projection*model*wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
+{
+    //gl_Position = projection*model*wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
+    gl_Position = model * wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
 })";
 
+static const std::string pipeline_gs = R"(
+
+layout (points) in;
+layout (triangle_strip, max_vertices = 4) out;
+
+// Out:
+out vec2 texCoord;
+
+// Uniforms:
+uniform mat4 projection;
+uniform mat4 model;
+
+void main()
+{
+    vec4 p = gl_in[0].gl_Position;
+
+    // Lower left vertex:
+    {
+        vec2 pv = p.xy + vec2(-0.5, -0.5);
+        gl_Position = projection * vec4(pv, p.zw);
+        texCoord = vec2(0.0, 0.0);
+        EmitVertex();
+    }
+
+    // Upper left vertex:
+    {
+        vec2 pv = p.xy + vec2(-0.5, 0.5);
+        gl_Position = projection * vec4(pv, p.zw);
+        texCoord = vec2(0.0, 1.0);
+        EmitVertex();
+    }
+
+    // Lower right vertex:
+    {
+        vec2 pv = p.xy + vec2(0.5, -0.5);
+        gl_Position = projection * vec4(pv, p.zw);
+        texCoord = vec2(1.0, 0.0);
+        EmitVertex();
+    }
+
+    // Upper right vertex:
+    {
+        vec2 pv = p.xy + vec2(0.5, 0.5);
+        gl_Position = projection * vec4(pv, p.zw);
+        texCoord = vec2(1.0, 1.0);
+        EmitVertex();
+    }
+
+    EndPrimitive();
+}
+)";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -70,11 +125,9 @@ out vec4 outFragment;
 
 void main()
 {
-   vec4 particle=texture(texture0, texCoord);
-   outFragment = particle;   
+    vec4 particle = texture(texture0, texCoord);
+    outFragment = particle;
 })";
-
-
 
 /////////////////////////
 // RESERVED STRUCTURES //
@@ -87,6 +140,7 @@ struct Eng::PipelineParticle::Reserved
 {
     Eng::Shader vs;
     Eng::Shader fs;
+    Eng::Shader gs;
     Eng::Program program;
     Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
     unsigned int particle;
@@ -167,7 +221,8 @@ bool ENG_API Eng::PipelineParticle::init()
     // Build:
     reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs_3);
     reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs_3);
-    if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
+    reserved->gs.load(Eng::Shader::Type::geometry, pipeline_gs);
+    if (reserved->program.build({ reserved->vs, reserved->fs, reserved->gs }) == false)
     {
         ENG_LOG_ERROR("Unable to build fullscreen2D program");
         return false;
@@ -273,7 +328,7 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, unsigned
     program.setMat4("model", reserved->model);
     glBindVertexArray(reserved->particle);
     //glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particleCount);
+    glDrawArraysInstanced(GL_POINTS, 0, 1, particleCount);
     glBindVertexArray(0);
 
     // Done:   
