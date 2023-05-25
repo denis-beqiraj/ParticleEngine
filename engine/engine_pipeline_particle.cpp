@@ -243,12 +243,6 @@ bool ENG_API Eng::PipelineParticle::init()
     unsigned int VBO;
     float particle_quad[] = {
         0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
     };
     glGenVertexArrays(1, &reserved->particle);
     glGenBuffers(1, &VBO);
