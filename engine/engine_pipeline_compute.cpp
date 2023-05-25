@@ -101,11 +101,11 @@ void main()
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
 
-        particles[i].color.a -= dT * 2.5f;
+        particles[i].color=vec4(1.0f,0.0f,0.0f,1.0f);
     }
 
     wTms[i] = 
-        mat4(vec4(1.0, 0.0, 0.0, 0.0),
+        mat4(particles[i].color,
              vec4(0.0, 1.0, 0.0, 0.0),
              vec4(0.0, 0.0, 1.0, 0.0),
              vec4(particles[i].currentPosition).xyz, 1.0);

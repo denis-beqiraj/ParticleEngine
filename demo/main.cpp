@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
-   value = 10000000;
+   value = 120;
    float currentValue;
    currentValue = value;
    createParticles(value);

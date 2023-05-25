@@ -36,7 +36,8 @@ layout(std430, binding=1) buffer ParticleTransforms
 };
 
 // Out:
-//out vec2 texCoord;
+out vec2 texCoord;
+out vec4 color; // New variable for color
 
 // In:
 layout (location = 0) in vec4 vertex; // <vec2 position, vec2 texCoords>
@@ -47,8 +48,11 @@ uniform mat4 model;
 
 void main()
 {
-    //gl_Position = projection*model*wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
-    gl_Position = model * wTms[gl_InstanceID]*vec4(vertex.xy, 0.0, 1.0);
+    mat4 wTms1 = wTms[gl_InstanceID];
+    color = wTms1[0];
+    wTms1[0] = vec4(0.0f);
+    gl_Position = model * wTms1 * vec4(vertex.xy, 0.0, 1.0);
+    texCoord = vertex.zw;
 })";
 
 static const std::string pipeline_gs = R"(
@@ -56,8 +60,13 @@ static const std::string pipeline_gs = R"(
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
+// In:
+in vec2 texCoord[];
+in vec4 color[]; // New input for color
+
 // Out:
-out vec2 texCoord;
+out vec2 texCoordG;
+out vec4 colorG; // Pass the color to fragment shader
 
 // Uniforms:
 uniform mat4 projection;
@@ -66,12 +75,12 @@ uniform mat4 model;
 void main()
 {
     vec4 p = gl_in[0].gl_Position;
-
     // Lower left vertex:
     {
         vec2 pv = p.xy + vec2(-0.5, -0.5);
         gl_Position = projection * vec4(pv, p.zw);
-        texCoord = vec2(0.0, 0.0);
+        texCoordG = vec2(0.0, 0.0);
+        colorG = color[0]; // Pass the color from vertex shader
         EmitVertex();
     }
 
@@ -79,7 +88,8 @@ void main()
     {
         vec2 pv = p.xy + vec2(-0.5, 0.5);
         gl_Position = projection * vec4(pv, p.zw);
-        texCoord = vec2(0.0, 1.0);
+        texCoordG = vec2(0.0, 1.0);
+        colorG = color[0]; // Pass the color from vertex shader
         EmitVertex();
     }
 
@@ -87,7 +97,8 @@ void main()
     {
         vec2 pv = p.xy + vec2(0.5, -0.5);
         gl_Position = projection * vec4(pv, p.zw);
-        texCoord = vec2(1.0, 0.0);
+        texCoordG = vec2(1.0, 0.0);
+        colorG = color[0]; // Pass the color from vertex shader
         EmitVertex();
     }
 
@@ -95,7 +106,8 @@ void main()
     {
         vec2 pv = p.xy + vec2(0.5, 0.5);
         gl_Position = projection * vec4(pv, p.zw);
-        texCoord = vec2(1.0, 1.0);
+        texCoordG = vec2(1.0, 1.0);
+        colorG = color[0]; // Pass the color from vertex shader
         EmitVertex();
     }
 
@@ -117,16 +129,16 @@ static const std::string pipeline_fs_3 = R"(
 #endif
 
 // In:   
-in vec2 texCoord;
-   
+in vec2 texCoordG;
+in vec4 colorG; // New input for color
+
 // Out:
 out vec4 outFragment;
 
-
 void main()
 {
-    vec4 particle = texture(texture0, texCoord);
-    outFragment = particle;
+    vec4 particle = texture(texture0, texCoordG);
+    outFragment = particle*colorG; // Output the color passed from the vertex shader
 })";
 
 /////////////////////////
