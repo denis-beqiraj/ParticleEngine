@@ -278,12 +278,12 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
     std::vector<Eng::PipelineCompute::ComputeParticle> particleSsbovs;
     for (auto particle : *particles) {
         Eng::PipelineCompute::ComputeParticle pSsbos;
-        pSsbos.initPosition = glm::vec4(particle.initPosition,0.0f);
-        pSsbos.currentPosition = glm::vec4(particle.currentPosition, 0.0f);
-        pSsbos.initVelocity = glm::vec4(particle.initVelocity, 0.0f);
-        pSsbos.currentVelocity = glm::vec4(particle.currentVelocity, 0.0f);
-        pSsbos.initAcceleration = glm::vec4(particle.initAcceleration, 0.0f);
-        pSsbos.currentAcceleration = glm::vec4(particle.currentAcceleration, 0.0f);
+        pSsbos.initPosition = particle.initPosition;
+        pSsbos.currentPosition = particle.currentPosition;
+        pSsbos.initVelocity = particle.initVelocity;
+        pSsbos.currentVelocity = particle.currentVelocity;
+        pSsbos.initAcceleration = particle.initAcceleration;
+        pSsbos.currentAcceleration = particle.currentAcceleration;
         pSsbos.initLife = particle.initLife;
         pSsbos.currentLife = particle.currentLife;
         pSsbos.minLife = particle.minLife;

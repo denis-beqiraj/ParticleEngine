@@ -15,8 +15,8 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		glm::mat4 position;
 	};
 	struct Particle {
-		glm::vec3 initPosition, initVelocity,initAcceleration;
-		glm::vec3 currentPosition, currentVelocity, currentAcceleration;
+		glm::vec4 initPosition, initVelocity,initAcceleration;
+		glm::vec4 currentPosition, currentVelocity, currentAcceleration;
 		glm::vec4 color;
 		float initLife;
 		float currentLife;
