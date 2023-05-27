@@ -31,6 +31,8 @@
    float rotX, rotY;
    bool mouseBR, mouseBL;
    float transZ = 50.0f;
+   glm::vec3 startPosition;
+   glm::vec3 end;
 
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
@@ -115,7 +117,7 @@ void createParticles(int maxParticles) {
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * 8.0f - 4.0f, -((float)rand() / RAND_MAX)*2, ((float)rand() / RAND_MAX) * 8.0f - 4.0f,0.0f);
+        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startPosition.x- startPosition.x/2, ((float)rand() / RAND_MAX)* startPosition.y - startPosition.y / 2, ((float)rand() / RAND_MAX) * startPosition.z - startPosition.z / 2,0.0f);
         particle.initAcceleration = glm::vec4(0.0f, 2.8f, 0.0f,0.0f);
         particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
         particle.minLife = -((float)rand() / RAND_MAX) * 50.0f;
@@ -160,8 +162,7 @@ int main(int argc, char *argv[])
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
    value = 120;
-   float currentValue;
-   currentValue = value;
+   startPosition = glm::vec3(8, -2, 8);
    createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
@@ -212,19 +213,22 @@ int main(int argc, char *argv[])
       eng.clear();
          //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
-         particleEmitter.setDt(fpsFactor);
+         particleEmitter.setDt(0.28);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
-         eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f);
-         if (currentValue != value) {
+         if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
              createParticles(value);
              particleEmitter.setParticles(particles);
          }
-         currentValue = value;
+         eng.getImgui()->newText("Start velocity");
+         if (eng.getImgui()->newBar("X", startPosition.x, -100.0f, 100.0f) | eng.getImgui()->newBar("Y", startPosition.y, -100.0f, 100.0f) | eng.getImgui()->newBar("Z", startPosition.z, -100.0f, 100.0f)) {
+             createParticles(value);
+             particleEmitter.setParticles(particles);
+         }
          eng.getImgui()->render();
       eng.swap();    
 
