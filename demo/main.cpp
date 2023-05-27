@@ -31,8 +31,8 @@
    float rotX, rotY;
    bool mouseBR, mouseBL;
    float transZ = 50.0f;
-   glm::vec3 startPosition;
-   glm::vec3 end;
+   glm::vec3 startVelocity;
+   glm::vec3 startAcceleration;
 
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
@@ -117,8 +117,8 @@ void createParticles(int maxParticles) {
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startPosition.x- startPosition.x/2, ((float)rand() / RAND_MAX)* startPosition.y - startPosition.y / 2, ((float)rand() / RAND_MAX) * startPosition.z - startPosition.z / 2,0.0f);
-        particle.initAcceleration = glm::vec4(0.0f, 2.8f, 0.0f,0.0f);
+        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x- startVelocity.x/2, ((float)rand() / RAND_MAX)* startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2,0.0f);
+        particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
         particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
         particle.minLife = -((float)rand() / RAND_MAX) * 50.0f;
         particles->push_back(particle);
@@ -162,7 +162,8 @@ int main(int argc, char *argv[])
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
    value = 120;
-   startPosition = glm::vec3(8, -2, 8);
+   startVelocity = glm::vec3(8, -2, 8);
+   startAcceleration = glm::vec3(0, 2.8, 0);
    createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
@@ -225,7 +226,12 @@ int main(int argc, char *argv[])
              particleEmitter.setParticles(particles);
          }
          eng.getImgui()->newText("Start velocity");
-         if (eng.getImgui()->newBar("X", startPosition.x, -100.0f, 100.0f) | eng.getImgui()->newBar("Y", startPosition.y, -100.0f, 100.0f) | eng.getImgui()->newBar("Z", startPosition.z, -100.0f, 100.0f)) {
+         if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
+             createParticles(value);
+             particleEmitter.setParticles(particles);
+         }
+         eng.getImgui()->newText("Start acceleration");
+         if (eng.getImgui()->newBar("XA", startAcceleration.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YA", startAcceleration.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZA", startAcceleration.z, -100.0f, 100.0f)) {
              createParticles(value);
              particleEmitter.setParticles(particles);
          }
