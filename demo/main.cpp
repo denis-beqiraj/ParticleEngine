@@ -33,6 +33,7 @@
    float transZ = 50.0f;
    glm::vec3 startVelocity;
    glm::vec3 startAcceleration;
+   glm::vec3 color;
 
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
@@ -121,7 +122,19 @@ void createParticles(int maxParticles) {
         particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
         particle.initLife = ((float)rand() / RAND_MAX) * 10.0f;
         particle.minLife = -((float)rand() / RAND_MAX) * 50.0f;
+        particle.color = glm::vec4(color,1.0f);
         particles->push_back(particle);
+    }
+}
+
+void updateParticles(int maxParticles) {
+    for (int i = 0; i < maxParticles; i++) {
+        particles->at(i).initPosition = glm::vec4(0.0f);
+        particles->at(i).initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x - startVelocity.x / 2, ((float)rand() / RAND_MAX) * startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2, 0.0f);
+        particles->at(i).initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particles->at(i).initLife = ((float)rand() / RAND_MAX) * 10.0f;
+        particles->at(i).minLife = -((float)rand() / RAND_MAX) * 50.0f;
+        particles->at(i).color = glm::vec4(color, 1.0f);
     }
 }
 
@@ -164,6 +177,7 @@ int main(int argc, char *argv[])
    value = 120;
    startVelocity = glm::vec3(8, -2, 8);
    startAcceleration = glm::vec3(0, 2.8, 0);
+   color = glm::vec3(1,0,0);
    createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
@@ -227,12 +241,12 @@ int main(int argc, char *argv[])
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
-             createParticles(value);
+             updateParticles(value);
              particleEmitter.setParticles(particles);
          }
          eng.getImgui()->newText("Start acceleration");
          if (eng.getImgui()->newBar("XA", startAcceleration.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YA", startAcceleration.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZA", startAcceleration.z, -100.0f, 100.0f)) {
-             createParticles(value);
+             updateParticles(value);
              particleEmitter.setParticles(particles);
          }
          eng.getImgui()->render();
@@ -242,7 +256,7 @@ int main(int argc, char *argv[])
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       fpsFactor = 1.0f / fps;
-   }
+   } 
    std::cout << "Leaving main loop..." << std::endl;
 
    // Release engine:
