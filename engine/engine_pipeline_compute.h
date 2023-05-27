@@ -34,6 +34,7 @@ public: //
 	PipelineCompute(PipelineCompute const&) = delete;
 	virtual ~PipelineCompute();
 	void setModel(glm::mat4 model);
+	void setDt(float dT);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;
 	bool convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles);

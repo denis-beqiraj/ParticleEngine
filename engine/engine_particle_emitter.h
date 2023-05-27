@@ -9,11 +9,6 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	public: //
 	//////////
 	static ParticleEmitter empty;
-	struct RenderData {
-		glm::mat4 modelViewMat;
-		float dt;
-		glm::mat4 position;
-	};
 	struct Particle {
 		glm::vec4 initPosition, initVelocity,initAcceleration;
 		glm::vec4 currentPosition, currentVelocity, currentAcceleration;
@@ -37,19 +32,12 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	void setTexture(const Eng::Bitmap& sprite);
 	void setProjection(glm::mat4 projection);
 	void setParticles(std::shared_ptr<std::vector<Particle>> particles);
+	void setDt(float dT);
 
 	///////////
 	private: //
 	///////////
 
-	struct ParticleArrayNode {
-		bool isFree;
-
-		union {
-			Particle particle;
-			ParticleArrayNode* nextFree;
-		};
-	};
 
 	// Reserved:
 	struct Reserved;

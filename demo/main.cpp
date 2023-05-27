@@ -192,7 +192,6 @@ int main(int argc, char *argv[])
    particleEmitter.setMatrix(pos);
    particleEmitter.setProjection(camera.getProjMatrix());
    root.get().addChild(particleEmitter);
-   Eng::ParticleEmitter::RenderData data;
    //computePipe.convert(particles);
    while (eng.processEvents())
    {      
@@ -211,10 +210,9 @@ int main(int argc, char *argv[])
       
       // Main rendering:
       eng.clear();
-         data.position = pos;
-         data.dt = fpsFactor;
          //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
+         particleEmitter.setDt(fpsFactor);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      

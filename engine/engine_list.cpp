@@ -264,11 +264,9 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
       // TODO(jan): renderdata should probably not be a member of particleemitter
       // TODO(jan): pass delta time somehow
        RenderableElem& re = reserved->renderableElem.at(c);
-       Eng::ParticleEmitter::RenderData renderData;
-       renderData.modelViewMat = cameraMatrix * re.matrix;
-       renderData.dt = 0.16f;//TODO GLOBAL DT
+       glm::mat4 modelViewMat = cameraMatrix * re.matrix;
        //glm::mat4 finalMatrix = cameraMatrix * re.matrix;
-       re.reference.get().render(0, &renderData);
+       re.reference.get().render(0, &modelViewMat);
    }
    if (isTrasparent) {
        glDepthMask(true);

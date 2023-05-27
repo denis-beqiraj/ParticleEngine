@@ -34,7 +34,7 @@ static const std::string pipeline_cs = R"(
 // This is the (hard-coded) workgroup size:
 layout (local_size_x = )"+LOCAL_SIZE+R"() in;
 
-
+uniform float dT;
 
 ////////////
 // LIGHTS //
@@ -87,7 +87,6 @@ void main()
    if(i>particles.length()){
     return;
    }
-    float dT=0.28;
     particles[i].currentLife -= dT;
     if (particles[i].currentLife < particles[i].minLife) {
         float rColor = 0.5f + ((rand() % 100) / 100.0f);
@@ -130,7 +129,7 @@ struct Eng::PipelineCompute::Reserved
     glm::mat4 model;
     Eng::Ssbo particles;
     Eng::Ssbo particleMatrices;
-    
+    float dT;
     /**
      * Constructor.
      */
@@ -269,6 +268,7 @@ void ENG_API Eng::PipelineCompute::render()
     program.render();
     reserved->particles.render(0);
     reserved->particleMatrices.render(1);
+    program.setFloat("dT", reserved->dT);
     program.compute(reserved->particleSize); // 8 is the hard-coded size of the workgroup
     program.wait();
 }
@@ -300,4 +300,9 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
 
 Eng::Ssbo ENG_API* Eng::PipelineCompute::getMatricesSsbo() {
     return &reserved->particleMatrices;
+}
+
+void ENG_API Eng::PipelineCompute::setDt(float dT)
+{
+    reserved->dT = dT;
 }

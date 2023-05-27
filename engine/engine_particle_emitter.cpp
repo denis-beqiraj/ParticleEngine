@@ -40,6 +40,7 @@ struct Eng::ParticleEmitter::Reserved
     Eng::PipelineParticle particlePipe;
     Eng::Texture texture;
     Eng::PipelineCompute computePipe;
+    float dT;
 };
 
 ///////////////////////////////////
@@ -87,18 +88,18 @@ ENG_API Eng::ParticleEmitter::~ParticleEmitter()
  */
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
-    auto renderData = *(Eng::ParticleEmitter::RenderData*)data;
+    auto renderData = *(glm::mat4*)data;
 
     //THINGS TO DO IN COMPUTE SHADER
     // Spawn new particles
     // Update all particles
-    float dT = renderData.dt;
+    reserved->computePipe.setDt(reserved->dT);
     reserved->computePipe.render();
 
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
-    reserved->particlePipe.setModel(renderData.modelViewMat);
+    reserved->particlePipe.setModel(renderData);
     reserved->particlePipe.render(reserved->texture, reserved->particles->size());
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -121,4 +122,9 @@ void ENG_API Eng::ParticleEmitter::setParticles(std::shared_ptr<std::vector<Part
 {
     reserved->particles = particles;
     reserved->computePipe.convert(reserved->particles);
+}
+
+void ENG_API Eng::ParticleEmitter::setDt(float dT)
+{
+    reserved->dT = dT;
 }
