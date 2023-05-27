@@ -31,9 +31,16 @@ void ENG_API Eng::ImGuiEngine::newFrame()
     ImGui::Begin("Particle System");
 }
 
-void ENG_API Eng::ImGuiEngine::newBar(std::string type, float& value, float min, float max)
+bool ENG_API Eng::ImGuiEngine::newBar(std::string type, float& value, float min, float max)
 {
+    float old = value;
     ImGui::SliderFloat(type.c_str(), &value, min, max);
+    if (old != value) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void ENG_API Eng::ImGuiEngine::newText(std::string text)

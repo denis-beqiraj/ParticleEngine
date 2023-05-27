@@ -20,7 +20,7 @@ public: //
 	   // Const/dest:
 	ImGuiEngine(void* window);
 	void newFrame();
-	void newBar(std::string type,float& value,float min,float max);
+	bool newBar(std::string type,float& value,float min,float max);
 	void newText(std::string text);
 	void render();
 };
