@@ -76,6 +76,7 @@ uniform mat4 view;
 
 void main()
 {
+
     vec4 p = gl_in[0].gl_Position;
     // Lower left vertex:
     {

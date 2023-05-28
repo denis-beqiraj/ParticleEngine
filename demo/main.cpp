@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
-         // full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
+         //  full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
