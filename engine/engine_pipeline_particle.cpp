@@ -52,7 +52,7 @@ void main()
     mat4 wTms1 = wTms[gl_InstanceID];
     color = wTms1[0];
     wTms1[0] = vec4(0.0f);
-    gl_Position = view*wTms1 * vec4(vertex.xy, 0.0, 1.0);
+    gl_Position = view*model*wTms1 * vec4(vertex.xy, 0.0, 1.0);
     texCoord = vertex.zw;
 })";
 
