@@ -218,6 +218,7 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
    size_t startRange = 0;
    size_t endRange = reserved->renderableElem.size();
    bool isTrasparent = false;
+   bool isParticle = false;
    switch (pass)
    {
       //////////////////
@@ -253,20 +254,31 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
 
       case Pass::particleemitters:
           startRange = reserved->nrOfLights + reserved->nrOfOpaqueMeshes + reserved->nrOfTransparentMeshes;
+          isParticle = true;
           break;
    }
    if (isTrasparent) {
        glDepthMask(false);
    }
-   // Iterate through the range:
-   for (size_t c = startRange; c < endRange; c++)
-   {
-      // TODO(jan): renderdata should probably not be a member of particleemitter
-      // TODO(jan): pass delta time somehow
-       RenderableElem& re = reserved->renderableElem.at(c);
-       glm::mat4 modelViewMat = cameraMatrix * re.matrix;
-       //glm::mat4 finalMatrix = cameraMatrix * re.matrix;
-       re.reference.get().render(0, &modelViewMat);
+   if (isParticle) {
+       // Iterate through the range:
+       for (size_t c = startRange; c < endRange; c++)
+       {
+           RenderableElem& re = reserved->renderableElem.at(c);
+           Eng::ParticleEmitter::ParticleModelView modelView;
+           modelView.model = re.matrix;
+           modelView.view = cameraMatrix;
+           //glm::mat4 finalMatrix = cameraMatrix * re.matrix;
+           re.reference.get().render(0, &modelView);
+       }
+   }
+   else {
+       for (size_t c = startRange; c < endRange; c++)
+       {
+           RenderableElem& re = reserved->renderableElem.at(c);
+           glm::mat4 modelViewMat = cameraMatrix * re.matrix;
+           re.reference.get().render(0, &modelViewMat);
+       }
    }
    if (isTrasparent) {
        glDepthMask(true);

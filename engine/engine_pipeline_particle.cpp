@@ -45,13 +45,14 @@ layout (location = 0) in vec4 vertex; // <vec2 position, vec2 texCoords>
 // Uniforms:
 uniform mat4 projection;
 uniform mat4 model;
+uniform mat4 view;
 
 void main()
 {
     mat4 wTms1 = wTms[gl_InstanceID];
     color = wTms1[0];
     wTms1[0] = vec4(0.0f);
-    gl_Position = model * wTms1 * vec4(vertex.xy, 0.0, 1.0);
+    gl_Position = view*wTms1 * vec4(vertex.xy, 0.0, 1.0);
     texCoord = vertex.zw;
 })";
 
@@ -71,6 +72,7 @@ out vec4 colorG; // Pass the color to fragment shader
 // Uniforms:
 uniform mat4 projection;
 uniform mat4 model;
+uniform mat4 view;
 
 void main()
 {
@@ -157,6 +159,7 @@ struct Eng::PipelineParticle::Reserved
     Eng::Vao vao;  ///< Dummy VAO, always required by context profiles
     unsigned int particle;
     glm::mat4 model;
+    glm::mat4 view;
     glm::mat4 projection;
 
     /**
@@ -292,6 +295,11 @@ void ENG_API Eng::PipelineParticle::setModel(glm::mat4 model)
     reserved->model = model;
 }
 
+void ENG_API Eng::PipelineParticle::setView(glm::mat4 view)
+{
+    reserved->view = view;
+}
+
 void ENG_API Eng::PipelineParticle::setProjection(glm::mat4 projection)
 {
     reserved->projection = projection;
@@ -332,6 +340,7 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, unsigned
     texture.render(0);
     program.setMat4("projection", reserved->projection);
     program.setMat4("model", reserved->model);
+    program.setMat4("view", reserved->view);
     glBindVertexArray(reserved->particle);
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     glDrawArraysInstanced(GL_POINTS, 0, 1, particleCount);

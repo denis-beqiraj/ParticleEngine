@@ -24,6 +24,7 @@ public: //
 	PipelineParticle(PipelineParticle const&) = delete;
 	virtual ~PipelineParticle();
 	void setModel(glm::mat4 model);
+	void setView(glm::mat4 view);
 	void setProjection(glm::mat4 projection);
 	// Rendering methods:
 	// bool render(uint32_t value = 0, void *data = nullptr) const = delete;

@@ -88,7 +88,7 @@ ENG_API Eng::ParticleEmitter::~ParticleEmitter()
  */
 bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
 {
-    auto renderData = *(glm::mat4*)data;
+    auto renderData = *(Eng::ParticleEmitter::ParticleModelView*)data;
 
     //THINGS TO DO IN COMPUTE SHADER
     // Spawn new particles
@@ -99,7 +99,8 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
-    reserved->particlePipe.setModel(renderData);
+    reserved->particlePipe.setModel(renderData.model);
+    reserved->particlePipe.setView(renderData.view);
     reserved->particlePipe.render(reserved->texture, reserved->particles->size());
     glDepthMask(GL_TRUE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
