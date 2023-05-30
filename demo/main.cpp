@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
    std::cout << "Entering main loop..." << std::endl;      
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 1.0f;
+   float currentFps = 0.0f;
    Eng::ParticleEmitter particleEmitter(particles);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
@@ -231,7 +232,7 @@ int main(int argc, char *argv[])
       eng.clear();
          //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
-         particleEmitter.setDt(0.28);
+         particleEmitter.setDt(currentFps);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
@@ -264,6 +265,7 @@ int main(int argc, char *argv[])
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       seconds = seconds + deltaTime;
+      currentFps = 1.0f / fps;
       if (seconds > 1000.0f) {
           fpsFactor = 1.0f / fps;
           seconds = 0.0f;
