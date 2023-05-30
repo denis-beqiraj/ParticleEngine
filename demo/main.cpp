@@ -223,11 +223,10 @@ int main(int argc, char *argv[])
 
       // Animate torus knot:      
       tknot.get().setMatrix(glm::rotate(tknot.get().getMatrix(), glm::radians(15.0f * fpsFactor), glm::vec3(0.0f, 1.0f, 0.0f)));
-      
       // Update list:
       list.reset();
       list.process(root);
-      
+
       // Main rendering:
       eng.clear();
          //particleEmitter.render(0U,(void*)&data);
