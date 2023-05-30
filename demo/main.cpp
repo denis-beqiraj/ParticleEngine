@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
    startVelocity = glm::vec3(8, -2, 8);
    startAcceleration = glm::vec3(0, 2.8, 0);
    color = glm::vec3(1,0,0);
-   initLife = glm::vec2(1, 0);
+   initLife = glm::vec2(10, -50);
    createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
