@@ -40,7 +40,6 @@ struct Eng::ParticleEmitter::Reserved
     Eng::PipelineParticle particlePipe;
     Eng::Texture texture;
     Eng::PipelineCompute computePipe;
-    float dT;
 };
 
 ///////////////////////////////////
@@ -93,7 +92,6 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     //THINGS TO DO IN COMPUTE SHADER
     // Spawn new particles
     // Update all particles
-    reserved->computePipe.setDt(reserved->dT);
     reserved->computePipe.render();
 
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
@@ -127,5 +125,12 @@ void ENG_API Eng::ParticleEmitter::setParticles(std::shared_ptr<std::vector<Part
 
 void ENG_API Eng::ParticleEmitter::setDt(float dT)
 {
-    reserved->dT = dT;
+    reserved->computePipe.getProgram().render();
+    reserved->computePipe.getProgram().setFloat("dT", dT);
+}
+
+void ENG_API Eng::ParticleEmitter::setPlaneMinimum(float planeMinimum)
+{
+    reserved->computePipe.getProgram().render();
+    reserved->computePipe.getProgram().setFloat("planeMinimum", planeMinimum);
 }

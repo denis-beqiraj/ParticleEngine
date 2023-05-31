@@ -35,6 +35,7 @@ static const std::string pipeline_cs = R"(
 layout (local_size_x = )"+LOCAL_SIZE+R"() in;
 
 uniform float dT;
+uniform float planeMinimum;
 
 ////////////
 // LIGHTS //
@@ -99,7 +100,10 @@ void main()
     } else {
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
-
+        if(particles[i].currentPosition.y<planeMinimum){
+            particles[i].currentPosition.y=planeMinimum;
+            particles[i].currentVelocity.y=-particles[i].currentVelocity.y*0.8f;
+        }
         particles[i].color=vec4(1.0f,0.0f,0.0f,1.0f);
     }
 
@@ -268,7 +272,6 @@ void ENG_API Eng::PipelineCompute::render()
     program.render();
     reserved->particles.render(0);
     reserved->particleMatrices.render(1);
-    program.setFloat("dT", reserved->dT);
     program.compute(reserved->particleSize); // 8 is the hard-coded size of the workgroup
     program.wait();
 }
@@ -300,9 +303,4 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
 
 Eng::Ssbo ENG_API* Eng::PipelineCompute::getMatricesSsbo() {
     return &reserved->particleMatrices;
-}
-
-void ENG_API Eng::PipelineCompute::setDt(float dT)
-{
-    reserved->dT = dT;
 }

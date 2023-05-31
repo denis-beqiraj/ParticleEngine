@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
          //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
          particleEmitter.setDt(currentFps);
+         particleEmitter.setPlaneMinimum(-5.0f);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
