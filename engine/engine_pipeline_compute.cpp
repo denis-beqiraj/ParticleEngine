@@ -279,7 +279,7 @@ void ENG_API Eng::PipelineCompute::render()
 bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles)
 {
     std::vector<Eng::PipelineCompute::ComputeParticle> particleSsbovs;
-    for (auto particle : *particles) {
+    for (auto& particle : *particles) {
         Eng::PipelineCompute::ComputeParticle pSsbos;
         pSsbos.initPosition = particle.initPosition;
         pSsbos.currentPosition = particle.currentPosition;

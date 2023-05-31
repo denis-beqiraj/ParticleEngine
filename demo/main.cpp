@@ -121,7 +121,11 @@ void createParticles(int maxParticles) {
         particle.initPosition = glm::vec4(0.0f);
         particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x- startVelocity.x/2, ((float)rand() / RAND_MAX)* startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2,0.0f);
         particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
+        particle.currentPosition = particle.initPosition;
+        particle.currentVelocity = particle.initVelocity;
+        particle.currentAcceleration = particle.initAcceleration;
         particle.initLife = ((float)rand() / RAND_MAX) * initLife.x;
+        particle.currentLife = 0.0f;
         particle.minLife = ((float)rand() / RAND_MAX) * initLife.y;
         particle.color = glm::vec4(color,1.0f);
         particles->push_back(particle);
@@ -175,11 +179,11 @@ int main(int argc, char *argv[])
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
-   value = 5;
+   value = 120;
    startVelocity = glm::vec3(8, -2, 8);
    startAcceleration = glm::vec3(0, 2.8, 0);
    color = glm::vec3(1,0,0);
-   initLife = glm::vec2(10, -50);
+   initLife = glm::vec2(2, -5);
    createParticles(value);
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
