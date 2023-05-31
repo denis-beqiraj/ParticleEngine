@@ -119,7 +119,7 @@ void createParticles(int maxParticles) {
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * i- i/2, ((float)rand() / RAND_MAX)* i - i / 2, ((float)rand() / RAND_MAX) * i - i / 2,0.0f);
+        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x- startVelocity.x/2, ((float)rand() / RAND_MAX)* startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2,0.0f);
         particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
         particle.initLife = ((float)rand() / RAND_MAX) * initLife.x;
         particle.minLife = ((float)rand() / RAND_MAX) * initLife.y;
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
    glm::mat4 pos(1.0f);
    pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
-   value = 120;
+   value = 5;
    startVelocity = glm::vec3(8, -2, 8);
    startAcceleration = glm::vec3(0, 2.8, 0);
    color = glm::vec3(1,0,0);
