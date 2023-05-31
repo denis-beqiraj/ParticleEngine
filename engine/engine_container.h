@@ -37,7 +37,6 @@ public: //
    Eng::Light &getLastLight() const;   
    Eng::Material &getLastMaterial() const;   
    Eng::Texture &getLastTexture() const;  
-   Eng::ParticleEmitter &getLastParticleEmitter() const;
    std::list<Eng::Node> &getNodeList();
    std::list<Eng::Mesh> &getMeshList();
    std::list<Eng::Light> &getLightList();

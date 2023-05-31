@@ -23,8 +23,6 @@
 
 //#define PE_CUSTOM_CONTAINER
 
-Eng::ParticleEmitter Eng::ParticleEmitter::empty = Eng::ParticleEmitter(std::shared_ptr<std::vector<Particle>>());
-
 
 
 /////////////////////////

@@ -12,7 +12,6 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		glm::mat4 model;
 		glm::mat4 view;
 	};
-	static ParticleEmitter empty;
 	struct Particle {
 		glm::vec4 initPosition, initVelocity,initAcceleration;
 		glm::vec4 currentPosition, currentVelocity, currentAcceleration;

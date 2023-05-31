@@ -183,20 +183,6 @@ Eng::Texture ENG_API &Eng::Container::getLastTexture() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Gets last added particle emitter.
- * @return last added particle emitter
- */
-Eng::ParticleEmitter ENG_API &Eng::Container::getLastParticleEmitter() const
-{
-   // Safety net:
-   if (reserved->allParticleEmitters.empty())
-      return Eng::ParticleEmitter::empty;
-   return reserved->allParticleEmitters.back();
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
  * Gets direct access to the list of nodes.
  * @return list of nodes
  */
