@@ -27,6 +27,7 @@ public: //
 		float currentLife;
 		float minLife;
 		float pos1;
+		float scale;
 	};
 	   // Const/dest:
 	PipelineCompute();

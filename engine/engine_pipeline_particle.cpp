@@ -30,9 +30,16 @@
  */
 static const std::string pipeline_vs_3 = R"(
 
+struct ParticleTransform
+{
+    vec3 position;
+    float scale;
+    vec4 color;
+};
+
 layout(std430, binding=1) buffer ParticleTransforms
 {
-    mat4 wTms[];
+    ParticleTransform transforms[];
 };
 
 // Out:
@@ -49,10 +56,10 @@ uniform mat4 view;
 
 void main()
 {
-    mat4 wTms1 = wTms[gl_InstanceID];
-    color = wTms1[0];
-    wTms1[0] = vec4(0.0f);
-    gl_Position = view*model*wTms1 * vec4(vertex.xy, 0.0, 1.0);
+    mat4 wTm = mat4(transforms[gl_InstanceID].scale);
+    wTm[3] = vec4(transforms[gl_InstanceID].position, 1.0f);
+    color = transforms[gl_InstanceID].color;
+    gl_Position = view*model*wTm * vec4(vertex.xy, 0.0, 1.0);
     texCoord = vertex.zw;
 })";
 
@@ -252,10 +259,7 @@ bool ENG_API Eng::PipelineParticle::init()
         return false;
     }
 
-
-
-
-
+    // TODO(jan): Do we need the vbo information, since we only render points?
     unsigned int VBO;
     float particle_quad[] = {
         0.0f, 1.0f, 0.0f, 1.0f,

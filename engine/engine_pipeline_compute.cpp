@@ -50,8 +50,16 @@ struct ParticleCompute
 	float currentLife;
 	float minLife;
 	float pos1;
+    float scale;
 };
-   
+
+struct ParticleTransform
+{
+    vec3 position;
+    float scale;
+    vec4 color;
+};
+
 layout(std430, binding=0) buffer ParticleData
 {     
    ParticleCompute particles[];
@@ -59,7 +67,7 @@ layout(std430, binding=0) buffer ParticleData
 
 layout(std430, binding=1) buffer ParticleTransforms
 {
-    mat4 wTms[];
+    ParticleTransform transforms[];
 };
 
 uint rng_state;
@@ -73,7 +81,10 @@ uint rand()
     return rng_state;
 }
 
-
+float rand01()
+{
+    return float(rand()) * (1.0 / 4294967296.0);
+}
 
 //////////
 // MAIN //
@@ -97,6 +108,7 @@ void main()
         //particle->velocity = vec3(((float)rand() * (1.0 / 4294967296.0)) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
         particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
         //particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
+        particles[i].scale = rand01();
     } else {
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
@@ -107,11 +119,9 @@ void main()
         particles[i].color=vec4(1.0f,0.0f,0.0f,1.0f);
     }
 
-    wTms[i] = 
-        mat4(particles[i].color,
-             vec4(0.0, 1.0, 0.0, 0.0),
-             vec4(0.0, 0.0, 1.0, 0.0),
-             vec4(particles[i].currentPosition).xyz, 1.0);
+    transforms[i].position = particles[i].currentPosition.xyz;
+    transforms[i].scale = particles[i].scale;
+    transforms[i].color = particles[i].color;
 }
 )";
 
