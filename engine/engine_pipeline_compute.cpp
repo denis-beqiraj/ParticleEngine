@@ -49,7 +49,6 @@ struct ParticleCompute
 	float initLife;
 	float currentLife;
 	float minLife;
-	float pos1;
     float scale;
 };
 
