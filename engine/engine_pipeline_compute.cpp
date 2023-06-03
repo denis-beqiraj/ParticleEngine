@@ -36,6 +36,7 @@ layout (local_size_x = )"+LOCAL_SIZE+R"() in;
 
 uniform float dT;
 uniform float planeMinimum;
+uniform float bounciness;
 
 ////////////
 // LIGHTS //

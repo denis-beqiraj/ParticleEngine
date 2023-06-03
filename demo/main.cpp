@@ -197,6 +197,7 @@ int main(int argc, char *argv[])
    std::chrono::high_resolution_clock timer;
    float fpsFactor = 1.0f;
    float currentFps = 0.0f;
+   float bounciness = 0.8f;
    Eng::ParticleEmitter particleEmitter(particles);
    Eng::Bitmap sprite;
    sprite.load("grass.dds");
@@ -249,8 +250,10 @@ int main(int argc, char *argv[])
          eng.getImgui()->newText("Life");
          if (eng.getImgui()->newBar("Init life", initLife.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLife.y, -100.0f, 100.0f)) {
              createParticles(value);
-             particleEmitter.setParticles(particles);
+              particleEmitter.setParticles(particles);
          }
+         eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
+         particleEmitter.setBounciness(bounciness);
          eng.getImgui()->render();
       eng.swap();    
 

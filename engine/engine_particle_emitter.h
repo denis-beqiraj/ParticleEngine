@@ -37,6 +37,7 @@ class ENG_API ParticleEmitter final : public Eng::Node
 	void setParticles(std::shared_ptr<std::vector<Particle>> particles);
 	void setDt(float dT);
 	void setPlaneMinimum(float planeMinimum);
+	void setBounciness(float bounciness);
 
 	///////////
 	private: //

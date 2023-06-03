@@ -132,3 +132,9 @@ void ENG_API Eng::ParticleEmitter::setPlaneMinimum(float planeMinimum)
     reserved->computePipe.getProgram().render();
     reserved->computePipe.getProgram().setFloat("planeMinimum", planeMinimum);
 }
+
+void ENG_API Eng::ParticleEmitter::setBounciness(float bounciness)
+{
+    reserved->computePipe.getProgram().render();
+    reserved->computePipe.getProgram().setFloat("bounciness", bounciness);
+}
