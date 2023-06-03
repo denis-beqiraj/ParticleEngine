@@ -47,9 +47,11 @@ enum CameraMode {
    // Camera:
    CameraMode cameraMode;
    glm::vec3 firstPersonPosition;
-   glm::vec3 firstPersonDesiredVelocity;
-   glm::vec3 firstPersonVelocity;
+   float firstPersonDesiredVelocity;
+   float firstPersonVelocity;
    float firstPersonRot;
+   float firstPersonRotVelocity;
+   float firstPersonDesiredRotVelocity;
    const float firstPersonVelocityTransitionSpeed = 40.0f;
 
    // Pipelines:
@@ -130,22 +132,32 @@ void keyboardCallback(int key, int scancode, int action, int mods)
    } else if (cameraMode == CameraMode_FirstPerson) {
       switch (key) {
          case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
-         case 'A': firstPersonRot += glm::radians(10.0f); break;
-         case 'D': firstPersonRot -= glm::radians(10.0f); break;
+         case 'A': {
+               if (action == 0) {
+                  firstPersonDesiredRotVelocity = 0.0f;
+               } else {
+                  firstPersonDesiredRotVelocity = 5.0f;
+               }
+         } break;
+         case 'D': {
+               if (action == 0) {
+                  firstPersonDesiredRotVelocity = 0.0f;
+               } else {
+                  firstPersonDesiredRotVelocity = -5.0f;
+               }
+         } break;
          case 'W': {
             if (action == 0) {
-               firstPersonDesiredVelocity = glm::vec3(0.0f);
+               firstPersonDesiredVelocity = 0.0f;
             } else {
-               glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-               firstPersonDesiredVelocity = -cameraFront * 150.0f;
+               firstPersonDesiredVelocity = -120.0f;
             }
          } break;
          case 'S': {
             if (action == 0) {
-               firstPersonDesiredVelocity = glm::vec3(0.0f);
+               firstPersonDesiredVelocity = 0.0f;
             } else {
-               glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-               firstPersonDesiredVelocity = cameraFront * 150.0f;
+               firstPersonDesiredVelocity = 120.0f;
             }
          } break;
       }
@@ -169,6 +181,10 @@ void createParticles(int maxParticles) {
         particle.color = glm::vec4(color,1.0f);
         particles->push_back(particle);
     }
+}
+
+float lerp(float a, float b, float t) {
+   return a * (1.0f - t) + b * t;
 }
 
 glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
@@ -204,8 +220,11 @@ int main(int argc, char *argv[])
 
    cameraMode = CameraMode_Default;
    firstPersonPosition = glm::vec3(0.0f, 17.5f, 0.0f);
-   firstPersonVelocity = glm::vec3(0.0f);
-   firstPersonDesiredVelocity = glm::vec3(0.0f);
+   firstPersonVelocity = 0.0f;
+   firstPersonDesiredVelocity = 0.0f;
+   firstPersonRot = 0.0f;
+   firstPersonRotVelocity = 0.0f;
+   firstPersonDesiredRotVelocity = 0.0f;
 
    /////////////////
    // Loading scene:   
@@ -265,10 +284,19 @@ int main(int argc, char *argv[])
          camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
          root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
       } else if (cameraMode == CameraMode_FirstPerson) {
+         // Update rotation according to desired velocity
+         firstPersonRotVelocity = lerp(firstPersonRotVelocity, firstPersonDesiredRotVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
+         firstPersonRot += firstPersonRotVelocity * deltaTimeS;
+
+         // Update position according to desired velocity
+         glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
          firstPersonVelocity = lerp(firstPersonVelocity, firstPersonDesiredVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
-         firstPersonPosition += firstPersonVelocity * deltaTimeS;
+         firstPersonPosition += cameraFront * firstPersonVelocity * deltaTimeS;
+
+         // Calculate camera matrix
          glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
          camera.setMatrix(cameraMat);
+
          root.get().setMatrix(glm::mat4(1.0f));
       }
 
