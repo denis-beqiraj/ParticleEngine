@@ -45,6 +45,7 @@ layout(std430, binding=1) buffer ParticleTransforms
 // Out:
 out vec2 texCoord;
 out vec4 color; // New variable for color
+out float scale;
 
 // In:
 layout (location = 0) in vec4 vertex; // <vec2 position, vec2 texCoords>
@@ -59,6 +60,7 @@ void main()
     mat4 wTm = mat4(1.0f);
     wTm[3] = vec4(transforms[gl_InstanceID].position, 1.0f);
     color = transforms[gl_InstanceID].color;
+    scale = transforms[gl_InstanceID].scale;
     gl_Position = view*model*wTm * vec4(vertex.xy, 0.0, 1.0);
     texCoord = vertex.zw;
 })";
@@ -71,6 +73,7 @@ layout (triangle_strip, max_vertices = 4) out;
 // In:
 in vec2 texCoord[];
 in vec4 color[]; // New input for color
+in float scale[];
 
 // Out:
 out vec2 texCoordG;
@@ -81,25 +84,13 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 
-struct ParticleTransform
-{
-    vec3 position;
-    float scale;
-    vec4 color;
-};
-
-layout(std430, binding=1) buffer ParticleTransforms
-{
-    ParticleTransform transforms[];
-};
-
 void main()
 {
-
+    float halfSize = 0.5f * scale[0];
     vec4 p = gl_in[0].gl_Position;
     // Lower left vertex:
     {
-        vec2 pv = p.xy + vec2(-0.5, -0.5);
+        vec2 pv = p.xy + vec2(-halfSize, -halfSize);
         gl_Position = projection * vec4(pv, p.zw);
         texCoordG = vec2(0.0, 0.0);
         colorG = color[0]; // Pass the color from vertex shader
@@ -108,7 +99,7 @@ void main()
 
     // Upper left vertex:
     {
-        vec2 pv = p.xy + vec2(-0.5, 0.5);
+        vec2 pv = p.xy + vec2(-halfSize, halfSize);
         gl_Position = projection * vec4(pv, p.zw);
         texCoordG = vec2(0.0, 1.0);
         colorG = color[0]; // Pass the color from vertex shader
@@ -117,7 +108,7 @@ void main()
 
     // Lower right vertex:
     {
-        vec2 pv = p.xy + vec2(0.5, -0.5);
+        vec2 pv = p.xy + vec2(halfSize, -halfSize);
         gl_Position = projection * vec4(pv, p.zw);
         texCoordG = vec2(1.0, 0.0);
         colorG = color[0]; // Pass the color from vertex shader
@@ -126,7 +117,7 @@ void main()
 
     // Upper right vertex:
     {
-        vec2 pv = p.xy + vec2(0.5, 0.5);
+        vec2 pv = p.xy + vec2(halfSize, halfSize);
         gl_Position = projection * vec4(pv, p.zw);
         texCoordG = vec2(1.0, 1.0);
         colorG = color[0]; // Pass the color from vertex shader
