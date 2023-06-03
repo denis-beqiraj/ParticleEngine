@@ -114,7 +114,7 @@ void main()
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
         if(particles[i].currentPosition.y<planeMinimum){
             particles[i].currentPosition.y=planeMinimum;
-            particles[i].currentVelocity.y=-particles[i].currentVelocity.y*0.8f;
+            particles[i].currentVelocity.y=-particles[i].currentVelocity.y*bounciness;
         }
         particles[i].color=vec4(1.0f,0.0f,0.0f,1.0f);
     }
