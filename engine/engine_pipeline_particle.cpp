@@ -56,7 +56,7 @@ uniform mat4 view;
 
 void main()
 {
-    mat4 wTm = mat4(transforms[gl_InstanceID].scale);
+    mat4 wTm = mat4(1.0f);
     wTm[3] = vec4(transforms[gl_InstanceID].position, 1.0f);
     color = transforms[gl_InstanceID].color;
     gl_Position = view*model*wTm * vec4(vertex.xy, 0.0, 1.0);
@@ -80,6 +80,18 @@ out vec4 colorG; // Pass the color to fragment shader
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
+
+struct ParticleTransform
+{
+    vec3 position;
+    float scale;
+    vec4 color;
+};
+
+layout(std430, binding=1) buffer ParticleTransforms
+{
+    ParticleTransform transforms[];
+};
 
 void main()
 {
