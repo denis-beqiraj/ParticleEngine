@@ -20,8 +20,16 @@
 
 
    #include <imgui.h>
+   #include <GLFW/glfw3.h>
    #include <imgui_impl_glfw.h>
    #include <imgui_impl_opengl3.h>
+
+enum CameraMode {
+   CameraMode_None,
+   CameraMode_Default,
+   CameraMode_FirstPerson
+};
+
 //////////   
 // VARS //
 //////////
@@ -35,6 +43,14 @@
    glm::vec3 startAcceleration;
    glm::vec3 color;
    glm::vec2 initLife;
+
+   // Camera:
+   CameraMode cameraMode;
+   glm::vec3 firstPersonPosition;
+   glm::vec3 firstPersonDesiredVelocity;
+   glm::vec3 firstPersonVelocity;
+   float firstPersonRot;
+   const float firstPersonVelocityTransitionSpeed = 40.0f;
 
    // Pipelines:
    Eng::PipelineDefault dfltPipe;
@@ -75,8 +91,7 @@ void mouseCursorCallback(double mouseX, double mouseY)
 void mouseButtonCallback(int button, int action, int mods)
 {
    // ENG_LOG_DEBUG("button: %d, action: %d, mods: %d", button, action, mods);
-   switch (button)
-   {
+   switch (button) {
       case 0: mouseBL = (bool) action; break;
       case 1: mouseBR = (bool) action; break;
    }
@@ -106,10 +121,34 @@ void mouseScrollCallback(double scrollX, double scrollY)
  */
 void keyboardCallback(int key, int scancode, int action, int mods)
 {
-   // ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
-   switch (key)
-   {
-      case 'W': if (action == 0) dfltPipe.setWireframe(!dfltPipe.isWireframe()); break;         
+   ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
+   if (cameraMode == CameraMode_Default) {
+      switch (key) {
+         case 'C': if (action == 0) cameraMode = CameraMode_FirstPerson; break;
+         case 'W': if (action == 0) dfltPipe.setWireframe(!dfltPipe.isWireframe()); break;         
+      }
+   } else if (cameraMode == CameraMode_FirstPerson) {
+      switch (key) {
+         case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
+         case 'A': firstPersonRot += glm::radians(10.0f); break;
+         case 'D': firstPersonRot -= glm::radians(10.0f); break;
+         case 'W': {
+            if (action == 0) {
+               firstPersonDesiredVelocity = glm::vec3(0.0f);
+            } else {
+               glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+               firstPersonDesiredVelocity = -cameraFront * 150.0f;
+            }
+         } break;
+         case 'S': {
+            if (action == 0) {
+               firstPersonDesiredVelocity = glm::vec3(0.0f);
+            } else {
+               glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+               firstPersonDesiredVelocity = cameraFront * 150.0f;
+            }
+         } break;
+      }
    }
 }
 std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles;
@@ -130,6 +169,10 @@ void createParticles(int maxParticles) {
         particle.color = glm::vec4(color,1.0f);
         particles->push_back(particle);
     }
+}
+
+glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
+   return a * (1.0f - t) + b * t;
 }
 
 //////////
@@ -158,6 +201,11 @@ int main(int argc, char *argv[])
    eng.setMouseScrollCallback(mouseScrollCallback);
    eng.setKeyboardCallback(keyboardCallback);
    eng.initImgui();
+
+   cameraMode = CameraMode_Default;
+   firstPersonPosition = glm::vec3(0.0f, 17.5f, 0.0f);
+   firstPersonVelocity = glm::vec3(0.0f);
+   firstPersonDesiredVelocity = glm::vec3(0.0f);
 
    /////////////////
    // Loading scene:   
@@ -207,13 +255,22 @@ int main(int argc, char *argv[])
    root.get().addChild(particleEmitter);
    //computePipe.convert(particles);
    float seconds = 0.0f;
+   float deltaTimeS = 0.0f;
    while (eng.processEvents())
    {      
       auto start = timer.now();
 
       // Update viewpoint:
-      camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
-      root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
+      if (cameraMode == CameraMode_Default) {
+         camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
+         root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
+      } else if (cameraMode == CameraMode_FirstPerson) {
+         firstPersonVelocity = lerp(firstPersonVelocity, firstPersonDesiredVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
+         firstPersonPosition += firstPersonVelocity * deltaTimeS;
+         glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
+         camera.setMatrix(cameraMat);
+         root.get().setMatrix(glm::mat4(1.0f));
+      }
 
       // Animate torus knot:      
       tknot.get().setMatrix(glm::rotate(tknot.get().getMatrix(), glm::radians(15.0f * fpsFactor), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -261,6 +318,7 @@ int main(int argc, char *argv[])
       auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       seconds = seconds + deltaTime;
+      deltaTimeS = deltaTime / 1000.0f;
       currentFps = 1.0f / fps;
       if (seconds > 1000.0f) {
           fpsFactor = 1.0f / fps;
