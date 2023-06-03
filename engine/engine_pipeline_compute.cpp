@@ -93,12 +93,12 @@ float rand01()
 void main()
 {   
    
-   // Pixel coordinates:
-   uint i = gl_GlobalInvocationID.x;
-   rng_state=i;
-   if(i>particles.length()){
+    // Pixel coordinates:
+    uint i = gl_GlobalInvocationID.x;
+    rng_state=i;
+    if(i>particles.length()){
     return;
-   }
+    }
     particles[i].currentLife -= dT;
     if (particles[i].currentLife < particles[i].minLife) {
         float rColor = 0.5f + ((rand() % 100) / 100.0f);
