@@ -187,8 +187,19 @@ float lerp(float a, float b, float t) {
    return a * (1.0f - t) + b * t;
 }
 
-glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
-   return a * (1.0f - t) + b * t;
+void updateParticles() {
+    for (int i = 0; i < particles->size(); i++) {
+        particles->at(i).initPosition = glm::vec4(0.0f);
+        particles->at(i).initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x - startVelocity.x / 2, ((float)rand() / RAND_MAX) * startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2, 0.0f);
+        particles->at(i).initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particles->at(i).currentPosition = particles->at(i).initPosition;
+        particles->at(i).currentVelocity = particles->at(i).initVelocity;
+        particles->at(i).currentAcceleration = particles->at(i).initAcceleration;
+        particles->at(i).initLife = ((float)rand() / RAND_MAX) * initLife.x;
+        particles->at(i).currentLife = 0.0f;
+        particles->at(i).minLife = ((float)rand() / RAND_MAX) * initLife.y;
+        particles->at(i).color = glm::vec4(color, 1.0f);
+    }
 }
 
 //////////
@@ -324,18 +335,18 @@ int main(int argc, char *argv[])
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
-             createParticles(value);
+             updateParticles();
              particleEmitter.setParticles(particles);
          }
          eng.getImgui()->newText("Start acceleration");
          if (eng.getImgui()->newBar("XA", startAcceleration.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YA", startAcceleration.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZA", startAcceleration.z, -100.0f, 100.0f)) {
-             createParticles(value);
+             updateParticles();
              particleEmitter.setParticles(particles);
          }
          eng.getImgui()->newText("Life");
          if (eng.getImgui()->newBar("Init life", initLife.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLife.y, -100.0f, 100.0f)) {
-             createParticles(value);
-              particleEmitter.setParticles(particles);
+             updateParticles();
+             particleEmitter.setParticles(particles);
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
          particleEmitter.setBounciness(bounciness);
