@@ -108,7 +108,7 @@ void main()
         //particle->velocity = vec3(((float)rand() * (1.0 / 4294967296.0)) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
         particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
         //particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
-        particles[i].scale = rand01();
+        particles[i].scale = rand01()*5.0f;
     } else {
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
