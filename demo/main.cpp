@@ -123,7 +123,7 @@ void mouseScrollCallback(double scrollX, double scrollY)
  */
 void keyboardCallback(int key, int scancode, int action, int mods)
 {
-   ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
+   //ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
    if (cameraMode == CameraMode_Default) {
       switch (key) {
          case 'C': if (action == 0) cameraMode = CameraMode_FirstPerson; break;
@@ -184,6 +184,7 @@ void createParticles(int maxParticles) {
 }
 
 float lerp(float a, float b, float t) {
+   t = glm::clamp<float>(t, 0.0f, 1.0f);
    return a * (1.0f - t) + b * t;
 }
 
@@ -354,10 +355,11 @@ int main(int argc, char *argv[])
       eng.swap();    
 
       auto stop = timer.now();
-      auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
+      std::chrono::duration<float> fs = stop - start;
+      deltaTimeS = fs.count();
+      auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(fs).count() / 1000.0f;
       float fps = (1.0f / deltaTime) * 1000.0f;
       seconds = seconds + deltaTime;
-      deltaTimeS = deltaTime / 1000.0f;
       currentFps = 1.0f / fps;
       if (seconds > 1000.0f) {
           fpsFactor = 1.0f / fps;
