@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
    float seconds = 0.0f;
    float deltaTimeS = 0.0f;
    while (eng.processEvents())
-   {      
+   {
       auto start = timer.now();
 
       // Update viewpoint:
