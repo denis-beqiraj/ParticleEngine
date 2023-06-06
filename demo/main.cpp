@@ -247,11 +247,9 @@ int main(int argc, char *argv[])
    // Loading scene:   
    Eng::Ovo ovo; 
 
-   std::reference_wrapper<Eng::Node> root = ovo.load("demo1.ovo");
+   std::reference_wrapper<Eng::Node> root = ovo.load("demo.ovo");
    std::vector<Eng::ParticleEmitter::Particle> particles;
    std::vector<Eng::ParticleEmitter::Particle> fireParticles;
-   glm::mat4 pos(1.0f);
-   pos = glm::translate(pos, glm::vec3(0.0f, 10.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f));
    float value;
    value = 120;
    startVelocity = glm::vec3(8, -2, 8);
@@ -270,7 +268,8 @@ int main(int argc, char *argv[])
    light.get().setProjMatrix(glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, 1.0f, 1000.0f)); // Orthographic projection
    // light.get().setProjMatrix(glm::perspective(glm::radians(75.0f), 1.0f, 1.0f, 1000.0f)); // Perspective projection         
    // Get torus knot ref:
-   std::reference_wrapper<Eng::Mesh> tknot = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Torus Knot001"));
+   std::reference_wrapper<Eng::Mesh> torch = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Box001"));
+   std::reference_wrapper<Eng::Mesh> torchBase = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Arm"));
 
    // Rendering elements:
    Eng::List list;
@@ -288,21 +287,21 @@ int main(int argc, char *argv[])
    Eng::Bitmap sprite;
    sprite.load("smoke.dds");
    particleEmitter.setTexture(sprite);
-   particleEmitter.setMatrix(pos);
+   particleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 12.0f, 0.0f)));
    particleEmitter.setProjection(camera.getProjMatrix());
-   root.get().addChild(particleEmitter);
+   torch.get().addChild(particleEmitter);
    //computePipe.convert(particles);
 
    // fire
    Eng::ParticleEmitter fireParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(fireParticles));
    sprite.load("flame.dds");
    fireParticleEmitter.setTexture(sprite);
-   fireParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+   fireParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f)));
    fireParticleEmitter.setProjection(camera.getProjMatrix());
-   root.get().addChild(fireParticleEmitter);
-
+   particleEmitter.addChild(fireParticleEmitter);
    float seconds = 0.0f;
    float deltaTimeS = 0.0f;
+   glm::vec3 torchOffset = glm::vec3(2.0f, 0.0f, 0.0f);
    while (eng.processEvents())
    {      
       auto start = timer.now();
@@ -320,20 +319,17 @@ int main(int argc, char *argv[])
          glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
          firstPersonVelocity = lerp(firstPersonVelocity, firstPersonDesiredVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
          firstPersonPosition += cameraFront * firstPersonVelocity * deltaTimeS;
-
          // Calculate camera matrix
          glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
          camera.setMatrix(cameraMat);
-
+         torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f))* glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
          root.get().setMatrix(glm::mat4(1.0f));
       }
 
       // Animate torus knot:      
-      tknot.get().setMatrix(glm::rotate(tknot.get().getMatrix(), glm::radians(15.0f * fpsFactor), glm::vec3(0.0f, 1.0f, 0.0f)));
       // Update list:
       list.reset();
       list.process(root);
-
       // Main rendering:
       eng.clear();
          //particleEmitter.render(0U,(void*)&data);

@@ -172,16 +172,15 @@ void main()
    // Light only front faces:
    if (dot(N, V) > 0.0f)
    {
-      float shadow = 1.0f - shadowAmount(fragPositionLightSpace);     
       
       // Diffuse term:   
       float nDotL = max(0.0f, dot(N, L));      
-      fragColor += roughness_texel.r * nDotL * lightColor * shadow;
+      fragColor += roughness_texel.r * nDotL * lightColor;
       
       // Specular term:     
       vec3 H = normalize(L + V);                     
       float nDotH = max(0.0f, dot(N, H));         
-      fragColor += (1.0f - roughness_texel.r) * pow(nDotH, 70.0f) * lightColor * shadow;         
+      fragColor += (1.0f - roughness_texel.r) * pow(nDotH, 70.0f) * lightColor;         
    }
    
    outFragment = vec4((mtlEmission / float(totNrOfLights)) + fragColor * albedo_texel.xyz, mtlOpacity);      
@@ -403,7 +402,7 @@ bool ENG_API Eng::PipelineDefault::render(const Eng::Camera &camera, const Eng::
       const Eng::Light &light = dynamic_cast<const Eng::Light &>(lightRe.reference.get());
 
       // Render shadow map:
-      reserved->shadowMapping.render(lightRe, list);
+      //reserved->shadowMapping.render(lightRe, list);
 
       // Re-enable this pipeline's program:
       program.render();   
