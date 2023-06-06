@@ -20,7 +20,8 @@ class ENG_API ParticleEmitter final : public Eng::Node
 		float initLife;
 		float currentLife;
 		float minLife;
-		Particle() : initPosition(0.0f), initVelocity(0.0f), initAcceleration(1.0f), currentPosition(0.0f), currentVelocity(0.0f), currentAcceleration(1.0f), colorStart(1.0f), colorEnd(1.0f), initLife(0.0f), currentLife(0.0f) {}
+		float scale;
+		Particle() : initPosition(0.0f), initVelocity(0.0f), initAcceleration(1.0f), currentPosition(0.0f), currentVelocity(0.0f), currentAcceleration(1.0f), colorStart(1.0f), colorEnd(1.0f), initLife(0.0f), currentLife(0.0f), scale(0.0f) {}
 	};
 	// Const/dest:
 	ParticleEmitter(std::shared_ptr<std::vector<Particle>> particles);

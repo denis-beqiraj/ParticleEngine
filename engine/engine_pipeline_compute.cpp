@@ -303,6 +303,7 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
         pSsbos.minLife = particle.minLife;
         pSsbos.colorStart = particle.colorStart;
         pSsbos.colorEnd = particle.colorEnd;
+        pSsbos.scale = particle.scale;
         particleSsbovs.push_back(pSsbos);
     }
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
