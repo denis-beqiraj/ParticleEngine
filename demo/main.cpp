@@ -168,12 +168,17 @@ float rand01() {
    return (float)rand() / RAND_MAX;
 }
 
-void createParticles(std::vector<Eng::ParticleEmitter::Particle>& particles, int maxParticles, glm::vec4 colorStart, glm::vec4 colorEnd) {
+float randXY(float x, float y) {
+   return rand01() * (y - x) + x;
+}
+
+void createParticlesSmoke(std::vector<Eng::ParticleEmitter::Particle>& particles, int maxParticles, glm::vec4 colorStart, glm::vec4 colorEnd) {
     particles.clear();
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(glm::sin(rand01() * (glm::two_pi<float>())), 0.0f, glm::cos(rand01() * (glm::two_pi<float>())), 0.0f);
+        float alpha = rand01() * glm::two_pi<float>();
+        particle.initVelocity = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
         particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
@@ -183,6 +188,32 @@ void createParticles(std::vector<Eng::ParticleEmitter::Particle>& particles, int
         particle.currentLife = particle.initLife;
         particle.colorStart = colorStart;
         particle.colorEnd = colorEnd;
+        particle.scaleStart = randXY(7.0f, 9.0f);
+        particle.scaleEnd = randXY(12.0f, 15.0f);
+        particles.push_back(particle);
+    }
+}
+
+void createParticlesFire(std::vector<Eng::ParticleEmitter::Particle>& particles, int maxParticles, glm::vec4 colorStart, glm::vec4 colorEnd) {
+    particles.clear();
+    for (int i = 0; i < maxParticles; i++) {
+        Eng::ParticleEmitter::Particle particle;
+        float alpha = rand01() * glm::two_pi<float>();
+        particle.initPosition = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
+        alpha = rand01() * glm::two_pi<float>();
+        particle.initVelocity = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
+        alpha = rand01() * glm::two_pi<float>();
+        particle.initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particle.currentPosition = particle.initPosition;
+        particle.currentVelocity = particle.initVelocity;
+        particle.currentAcceleration = particle.initAcceleration;
+        particle.initLife = rand01() * initLife.x;
+        particle.minLife = rand01() * initLife.y * 0.25f;
+        particle.currentLife = particle.initLife;
+        particle.colorStart = colorStart;
+        particle.colorEnd = colorEnd;
+        particle.scaleStart = randXY(3.0f, 5.0f);
+        particle.scaleEnd = randXY(5.5f, 6.0f);
         particles.push_back(particle);
     }
 }
@@ -194,17 +225,13 @@ float lerp(float a, float b, float t) {
 
 void updateParticles(std::vector<Eng::ParticleEmitter::Particle>& particles) {
     for (int i = 0; i < particles.size(); i++) {
-        //particles.at(i).initPosition = glm::vec4(0.0f);
-        //particles.at(i).initVelocity = glm::vec4(glm::sin(rand01() * (glm::two_pi<float>())), 0.0f, glm::cos(rand01() * (glm::two_pi<float>())), 0.0f);
-        //particles.at(i).initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particles.at(i).initAcceleration = glm::vec4(startAcceleration, 0.0f);
         particles.at(i).currentPosition = particles.at(i).initPosition;
         particles.at(i).currentVelocity = particles.at(i).initVelocity;
         particles.at(i).currentAcceleration = particles.at(i).initAcceleration;
-        //particles.at(i).initLife = ((float)rand() / RAND_MAX) * initLife.x;
+        particles.at(i).initLife = ((float)rand() / RAND_MAX) * initLife.x;
         particles.at(i).currentLife = particles.at(i).initLife;
-        //particles.at(i).minLife = ((float)rand() / RAND_MAX) * initLife.y;
-        //particles->at(i).colorStart = particles->at(i).colorStart;
-        //particles->at(i).colorEnd = particles->at(i).colorEnd;
+        particles.at(i).minLife = ((float)rand() / RAND_MAX) * initLife.y;
     }
 }
 
@@ -258,8 +285,8 @@ int main(int argc, char *argv[])
    startAcceleration = glm::vec3(0, 2.8, 0);
    color = glm::vec3(1,0,0);
    initLife = glm::vec2(2, -5);
-   createParticles(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-   createParticles(fireParticles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesSmoke(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+   createParticlesFire(fireParticles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -350,7 +377,7 @@ int main(int argc, char *argv[])
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-             createParticles(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+             createParticlesSmoke(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
              particleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
          }
          eng.getImgui()->newText("Start velocity");

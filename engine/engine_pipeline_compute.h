@@ -27,7 +27,8 @@ public: //
 		float initLife;
 		float currentLife;
 		float minLife;
-		float scale;
+		float scaleStart;
+		float scaleEnd;
 	};
 	   // Const/dest:
 	PipelineCompute();

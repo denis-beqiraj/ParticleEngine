@@ -51,7 +51,8 @@ struct ParticleCompute
 	float initLife;
 	float currentLife;
 	float minLife;
-    float scale;
+    float scaleStart;
+    float scaleEnd;
 };
 
 struct ParticleTransform
@@ -108,7 +109,6 @@ void main()
         particles[i].currentLife = particles[i].initLife;
         particles[i].currentVelocity = particles[i].initVelocity; // TODO(jan): calculate better initial velocity
         particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
-        particles[i].scale = rand01()*5.0f;
     } else {
         // Update particle
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
@@ -120,9 +120,9 @@ void main()
     }
 
     transforms[i].position = particles[i].currentPosition.xyz;
-    transforms[i].scale = particles[i].scale;
-    float t = (particles[i].currentLife - particles[i].minLife) / (particles[i].initLife - particles[i].minLife);
-    transforms[i].color = mix(particles[i].colorStart, particles[i].colorEnd, 1.0f - t);
+    float t = 1.0f - (particles[i].currentLife - particles[i].minLife) / (particles[i].initLife - particles[i].minLife);
+    transforms[i].scale = mix(particles[i].scaleStart, particles[i].scaleEnd, t);
+    transforms[i].color = mix(particles[i].colorStart, particles[i].colorEnd, t);
 }
 )";
 
@@ -303,7 +303,8 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
         pSsbos.minLife = particle.minLife;
         pSsbos.colorStart = particle.colorStart;
         pSsbos.colorEnd = particle.colorEnd;
-        pSsbos.scale = particle.scale;
+        pSsbos.scaleStart = particle.scaleStart;
+        pSsbos.scaleEnd = particle.scaleEnd;
         particleSsbovs.push_back(pSsbos);
     }
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());
