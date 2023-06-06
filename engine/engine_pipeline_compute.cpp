@@ -46,7 +46,8 @@ struct ParticleCompute
 {    
 	vec4 initPosition, initVelocity, initAcceleration;
 	vec4 currentPosition, currentVelocity, currentAcceleration;
-	vec4 color;
+	vec4 colorStart;
+    vec4 colorEnd;
 	float initLife;
 	float currentLife;
 	float minLife;
@@ -62,7 +63,7 @@ struct ParticleTransform
 
 layout(std430, binding=0) buffer ParticleData
 {     
-   ParticleCompute particles[];
+    ParticleCompute particles[];
 };
 
 layout(std430, binding=1) buffer ParticleTransforms
@@ -101,27 +102,27 @@ void main()
     }
     particles[i].currentLife -= dT;
     if (particles[i].currentLife < particles[i].minLife) {
+        // Spawn new particle
         float rColor = 0.5f + ((rand() % 100) / 100.0f);
         particles[i].currentPosition = particles[i].initPosition; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
         particles[i].currentLife = particles[i].initLife;
         particles[i].currentVelocity = particles[i].initVelocity; // TODO(jan): calculate better initial velocity
-        //particle->velocity = vec3(((float)rand() * (1.0 / 4294967296.0)) * 2.0f - 1.0f, 2.0f, 0.0f); // TODO(jan): calculate better initial velocity
         particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
-        //particle->acceleration = glm::vec3(0.0f, -2.8f, 0.0f); // TODO(jan): calculate better initial velocity
         particles[i].scale = rand01()*5.0f;
     } else {
+        // Update particle
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
         particles[i].currentVelocity = particles[i].currentVelocity + particles[i].currentAcceleration*dT;
         if(particles[i].currentPosition.y<planeMinimum){
             particles[i].currentPosition.y=planeMinimum;
             particles[i].currentVelocity.y=-particles[i].currentVelocity.y*bounciness;
         }
-        particles[i].color=vec4(1.0f,0.0f,0.0f,1.0f);
     }
 
     transforms[i].position = particles[i].currentPosition.xyz;
     transforms[i].scale = particles[i].scale;
-    transforms[i].color = particles[i].color;
+    float t = (particles[i].currentLife - particles[i].minLife) / (particles[i].initLife - particles[i].minLife);
+    transforms[i].color = mix(particles[i].colorStart, particles[i].colorEnd, 1.0f - t);
 }
 )";
 
@@ -300,7 +301,8 @@ bool ENG_API Eng::PipelineCompute::convert(std::shared_ptr<std::vector<Eng::Part
         pSsbos.initLife = particle.initLife;
         pSsbos.currentLife = particle.currentLife;
         pSsbos.minLife = particle.minLife;
-        pSsbos.color = particle.color;
+        pSsbos.colorStart = particle.colorStart;
+        pSsbos.colorEnd = particle.colorEnd;
         particleSsbovs.push_back(pSsbos);
     }
     reserved->particles.create(particleSsbovs.size() * sizeof(Eng::PipelineCompute::ComputeParticle), particleSsbovs.data());

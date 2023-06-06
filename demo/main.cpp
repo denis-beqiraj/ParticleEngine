@@ -165,20 +165,26 @@ void keyboardCallback(int key, int scancode, int action, int mods)
 }
 std::shared_ptr<std::vector<Eng::ParticleEmitter::Particle>> particles;
 
+float rand01() {
+   return (float)rand() / RAND_MAX;
+}
+
 void createParticles(int maxParticles) {
     particles->clear();
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x- startVelocity.x/2, ((float)rand() / RAND_MAX)* startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2,0.0f);
+        //particle.initVelocity = glm::vec4(((float)rand() / RAND_MAX) * startVelocity.x- startVelocity.x/2, ((float)rand() / RAND_MAX)* startVelocity.y - startVelocity.y / 2, ((float)rand() / RAND_MAX) * startVelocity.z - startVelocity.z / 2,0.0f);
+         particle.initVelocity = glm::vec4(glm::sin(rand01() * (glm::two_pi<float>())), 0.0f, glm::cos(rand01() * (glm::two_pi<float>())), 0.0f);
         particle.initAcceleration = glm::vec4(startAcceleration,0.0f);
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
         particle.initLife = ((float)rand() / RAND_MAX) * initLife.x;
-        particle.currentLife = 0.0f;
         particle.minLife = ((float)rand() / RAND_MAX) * initLife.y;
-        particle.color = glm::vec4(color,1.0f);
+        particle.currentLife = particle.initLife;
+        particle.colorStart = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        particle.colorEnd = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);
         particles->push_back(particle);
     }
 }
@@ -197,9 +203,10 @@ void updateParticles() {
         particles->at(i).currentVelocity = particles->at(i).initVelocity;
         particles->at(i).currentAcceleration = particles->at(i).initAcceleration;
         particles->at(i).initLife = ((float)rand() / RAND_MAX) * initLife.x;
-        particles->at(i).currentLife = 0.0f;
+        particles->at(i).currentLife = particles->at(i).initLife;
         particles->at(i).minLife = ((float)rand() / RAND_MAX) * initLife.y;
-        particles->at(i).color = glm::vec4(color, 1.0f);
+      //   particles->at(i).colorStart = particles->at(i).colorStart;
+      //   particles->at(i).colorEnd = particles->at(i).colorEnd;
     }
 }
 
@@ -279,7 +286,7 @@ int main(int argc, char *argv[])
    float bounciness = 0.8f;
    Eng::ParticleEmitter particleEmitter(particles);
    Eng::Bitmap sprite;
-   sprite.load("grass.dds");
+   sprite.load("smoke.dds");
    particleEmitter.setTexture(sprite);
    particleEmitter.setMatrix(pos);
    particleEmitter.setProjection(camera.getProjMatrix());
@@ -352,7 +359,7 @@ int main(int argc, char *argv[])
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
          particleEmitter.setBounciness(bounciness);
          eng.getImgui()->render();
-      eng.swap();    
+      eng.swap();
 
       auto stop = timer.now();
       std::chrono::duration<float> fs = stop - start;

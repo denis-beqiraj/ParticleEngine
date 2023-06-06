@@ -22,7 +22,8 @@ public: //
 	{
 		glm::vec4 initPosition, initVelocity, initAcceleration;
 		glm::vec4 currentPosition, currentVelocity, currentAcceleration;
-		glm::vec4 color;
+		glm::vec4 colorStart;
+		glm::vec4 colorEnd;
 		float initLife;
 		float currentLife;
 		float minLife;

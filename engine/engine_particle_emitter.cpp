@@ -93,7 +93,7 @@ bool ENG_API Eng::ParticleEmitter::render(uint32_t value, void* data) const
     reserved->computePipe.render();
 
     //THINGS TO DO WHEN DRAW IN FRAGMENT SHADER
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE);
     reserved->particlePipe.setModel(renderData.model);
     reserved->particlePipe.setView(renderData.view);
