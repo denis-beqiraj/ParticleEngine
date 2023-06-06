@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
    eng.setKeyboardCallback(keyboardCallback);
    eng.initImgui();
 
-   cameraMode = CameraMode_Default;
+   cameraMode = CameraMode_FirstPerson;
    firstPersonPosition = glm::vec3(0.0f, 17.5f, 0.0f);
    firstPersonVelocity = 0.0f;
    firstPersonDesiredVelocity = 0.0f;
