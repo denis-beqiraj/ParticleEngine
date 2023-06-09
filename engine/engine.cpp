@@ -233,7 +233,7 @@ bool ENG_API Eng::Base::init()
       return false;
    }
    glfwSetWindowUserPointer(reserved->window, this);
-
+   glfwSetInputMode(reserved->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
    // Set context:
    glfwMakeContextCurrent(reserved->window);
 

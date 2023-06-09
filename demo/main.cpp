@@ -30,6 +30,18 @@ enum CameraMode {
    CameraMode_FirstPerson
 };
 
+// camera
+glm::vec3 cameraPos = glm::vec3(0.0f, 10.0f, 0.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+bool firstMouse = true;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
+
 //////////   
 // VARS //
 //////////
@@ -71,15 +83,39 @@ enum CameraMode {
 void mouseCursorCallback(double mouseX, double mouseY)
 {
    // ENG_LOG_DEBUG("x: %.1f, y: %.1f", mouseX, mouseY);
-   float deltaY = (float) (mouseX - oldMouseX);
-   oldMouseX = mouseX;
-   if (mouseBR)
-      rotY += deltaY;
+    float xpos = static_cast<float>(mouseX);
+    float ypos = static_cast<float>(mouseY);
 
-   float deltaX = (float) (mouseY - oldMouseY);
-   oldMouseY = mouseY;
-   if (mouseBR)
-      rotX += deltaX;
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
 }
 
 
@@ -123,6 +159,7 @@ void mouseScrollCallback(double scrollX, double scrollY)
  */
 void keyboardCallback(int key, int scancode, int action, int mods)
 {
+    float cameraSpeed = static_cast<float>(2.5);
    //ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
    if (cameraMode == CameraMode_Default) {
       switch (key) {
@@ -132,34 +169,18 @@ void keyboardCallback(int key, int scancode, int action, int mods)
    } else if (cameraMode == CameraMode_FirstPerson) {
       switch (key) {
          case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
-         case 'A': {
-               if (action == 0) {
-                  firstPersonDesiredRotVelocity = 0.0f;
-               } else {
-                  firstPersonDesiredRotVelocity = 5.0f;
-               }
-         } break;
-         case 'D': {
-               if (action == 0) {
-                  firstPersonDesiredRotVelocity = 0.0f;
-               } else {
-                  firstPersonDesiredRotVelocity = -5.0f;
-               }
-         } break;
-         case 'W': {
-            if (action == 0) {
-               firstPersonDesiredVelocity = 0.0f;
-            } else {
-               firstPersonDesiredVelocity = -120.0f;
-            }
-         } break;
-         case 'S': {
-            if (action == 0) {
-               firstPersonDesiredVelocity = 0.0f;
-            } else {
-               firstPersonDesiredVelocity = 120.0f;
-            }
-         } break;
+         case 'W': 
+                 cameraPos += cameraSpeed * cameraFront;
+             break;
+         case 'S': 
+                 cameraPos -= cameraSpeed * cameraFront;
+             break;
+         case 'A': 
+                 cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+             break;
+         case 'D': 
+                 cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+             break;
       }
    }
 }
@@ -338,16 +359,9 @@ int main(int argc, char *argv[])
          camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
          root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
       } else if (cameraMode == CameraMode_FirstPerson) {
-         // Update rotation according to desired velocity
-         firstPersonRotVelocity = lerp(firstPersonRotVelocity, firstPersonDesiredRotVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
-         firstPersonRot += firstPersonRotVelocity * deltaTimeS;
-
-         // Update position according to desired velocity
-         glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-         firstPersonVelocity = lerp(firstPersonVelocity, firstPersonDesiredVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
-         firstPersonPosition += cameraFront * firstPersonVelocity * deltaTimeS;
+         
          // Calculate camera matrix
-         glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
+         glm::mat4 cameraMat = glm::inverse(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp));
          camera.setMatrix(cameraMat);
          torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f))* glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
          root.get().setMatrix(glm::mat4(1.0f));
