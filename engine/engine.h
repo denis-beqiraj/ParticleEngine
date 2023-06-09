@@ -139,8 +139,8 @@ public: //
 //////////	   
 
    // Special values:
-   constexpr static int32_t dfltWindowSizeX = 1024;     ///< Default window width
-   constexpr static int32_t dfltWindowSizeY = 768;      ///< Default window height
+   constexpr static int32_t dfltWindowSizeX = 1920;     ///< Default window width
+   constexpr static int32_t dfltWindowSizeY = 1080;      ///< Default window height
 
    // Callback signatures:
    typedef void (* KeyboardCallback)   (int key, int scancode, int action, int mods);
