@@ -328,6 +328,8 @@ int main(int argc, char *argv[])
    particleEmitter.addChild(fireParticleEmitter);
    float seconds = 0.0f;
    float deltaTimeS = 0.0f;
+   float curAnimationTimeS = 0.0f;
+   float animationDurationS = 2.0f;
    glm::vec3 torchOffset = glm::vec3(2.0f, 0.0f, 0.0f);
    while (eng.processEvents())
    {
@@ -349,7 +351,12 @@ int main(int argc, char *argv[])
          // Calculate camera matrix
          glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
          camera.setMatrix(cameraMat);
-         torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f))* glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
+         curAnimationTimeS += deltaTimeS;
+         while (curAnimationTimeS > animationDurationS) {
+            curAnimationTimeS -= animationDurationS;
+         }
+         float rotVal = lerp(0.0f, glm::two_pi<float>(), curAnimationTimeS / animationDurationS);
+         torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(190.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(glm::sin(rotVal) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
          root.get().setMatrix(glm::mat4(1.0f));
       }
 
