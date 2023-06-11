@@ -501,6 +501,7 @@ int main(int argc, char *argv[])
              fireworkParticleEmitterGreen.setPlaneMinimum(plane);
              fireworkParticleEmitterYellow.setPlaneMinimum(plane);
          }
+
          waterBounce.setDt(currentFps);
          waterBounce.setPlaneMinimum(-1.0f);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
