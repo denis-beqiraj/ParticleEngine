@@ -159,7 +159,7 @@ void mouseScrollCallback(double scrollX, double scrollY)
  */
 void keyboardCallback(int key, int scancode, int action, int mods)
 {
-    float cameraSpeed = static_cast<float>(2.5);
+    float cameraSpeed = static_cast<float>(5.0f);
    //ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
    if (cameraMode == CameraMode_Default) {
       switch (key) {
@@ -243,22 +243,20 @@ void createParticlesWater(std::vector<Eng::ParticleEmitter::Particle>& particles
     particles.clear();
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
+        particle.initPosition = glm::vec4(0.0f);
         float alpha = rand01() * glm::two_pi<float>();
-        particle.initPosition = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
-        alpha = rand01() * glm::two_pi<float>();
         particle.initVelocity = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
-        alpha = rand01() * glm::two_pi<float>();
         particle.initAcceleration = glm::vec4(-startAcceleration, 0.0f);
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
-        particle.initLife = rand01() * 20.0f;
-        particle.minLife = rand01() * -1.5f;
-        particle.currentLife = particle.initLife;
+        particle.initLife = rand01() * 20.5f;
+        particle.minLife = rand01() * -50.5f;
+        particle.currentLife = rand01()*(particle.initLife - particle.minLife)+ particle.minLife;
         particle.colorStart = colorStart;
         particle.colorEnd = colorEnd;
-        particle.scaleStart = randXY(3.0f, 5.0f);
-        particle.scaleEnd = randXY(5.5f, 6.0f);
+        particle.scaleStart = randXY(7.0f, 9.0f);
+        particle.scaleEnd = randXY(12.0f, 15.0f);
         particles.push_back(particle);
     }
 }
@@ -321,8 +319,12 @@ int main(int argc, char *argv[])
 
    std::reference_wrapper<Eng::Node> root = ovo.load("demo.ovo");
    std::vector<Eng::ParticleEmitter::Particle> particlesSmoke;
-   std::vector<Eng::ParticleEmitter::Particle> particlesWater;
    std::vector<Eng::ParticleEmitter::Particle> particlesFire;
+   std::vector<Eng::ParticleEmitter::Particle> particlesFireRed;
+   std::vector<Eng::ParticleEmitter::Particle> particlesFireGreen;
+   std::vector<Eng::ParticleEmitter::Particle> particlesFireBlue;
+   std::vector<Eng::ParticleEmitter::Particle> particlesFireYellow;
+
    float value;
    value = 120;
    startVelocity = glm::vec3(8, -2, 8);
@@ -331,7 +333,11 @@ int main(int argc, char *argv[])
    initLife = glm::vec2(2, -5);
    createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
    createParticlesFire(particlesFire, value, glm::vec4(1.0f, 0.9f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-   createParticlesWater(particlesWater, 1000, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.7f, 0.7f, 1.0f, 0.0f));
+   createParticlesWater(particlesFireRed, value, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesWater(particlesFireGreen, value, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesWater(particlesFireBlue, value, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesWater(particlesFireYellow, value, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -344,7 +350,10 @@ int main(int argc, char *argv[])
    // Get torus knot ref:
    std::reference_wrapper<Eng::Mesh> torch = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Box001"));
    std::reference_wrapper<Eng::Mesh> torchBase = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Arm"));
-   std::reference_wrapper<Eng::Mesh> sphere = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Sphere001"));
+   std::reference_wrapper<Eng::Mesh> firework = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Box002"));
+   std::reference_wrapper<Eng::Mesh> firework1 = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Box003"));
+   std::reference_wrapper<Eng::Mesh> firework2 = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Box004"));
+   std::reference_wrapper<Eng::Mesh> firework3 = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Box005"));
 
    // Rendering elements:
    Eng::List list;
@@ -375,12 +384,36 @@ int main(int argc, char *argv[])
    fireParticleEmitter.setProjection(camera.getProjMatrix());
    smokeParticleEmitter.addChild(fireParticleEmitter);
 
-   Eng::ParticleEmitter waterParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
+   Eng::ParticleEmitter fireworkParticleEmitterRed(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFireRed));
    sprite.load("flame.dds");
-   waterParticleEmitter.setTexture(sprite);
-   waterParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f)));
-   waterParticleEmitter.setProjection(camera.getProjMatrix());
-   sphere.get().addChild(waterParticleEmitter);
+   fireworkParticleEmitterRed.setTexture(sprite);
+   fireworkParticleEmitterRed.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 1.5f)));
+   fireworkParticleEmitterRed.setProjection(camera.getProjMatrix());
+   firework.get().addChild(fireworkParticleEmitterRed);
+
+   Eng::ParticleEmitter fireworkParticleEmitterBlue(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFireGreen));
+   sprite.load("flame.dds");
+   fireworkParticleEmitterBlue.setTexture(sprite);
+   fireworkParticleEmitterBlue.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 1.5f)));
+   fireworkParticleEmitterBlue.setProjection(camera.getProjMatrix());
+   firework1.get().addChild(fireworkParticleEmitterBlue);
+
+   Eng::ParticleEmitter fireworkParticleEmitterGreen(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFireBlue));
+   sprite.load("flame.dds");
+   fireworkParticleEmitterGreen.setTexture(sprite);
+   fireworkParticleEmitterGreen.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 1.5f)));
+   fireworkParticleEmitterGreen.setProjection(camera.getProjMatrix());
+   firework2.get().addChild(fireworkParticleEmitterGreen);
+
+   Eng::ParticleEmitter fireworkParticleEmitterYellow(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFireYellow));
+   sprite.load("flame.dds");
+   fireworkParticleEmitterYellow.setTexture(sprite);
+   fireworkParticleEmitterYellow.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 1.5f)));
+   fireworkParticleEmitterYellow.setProjection(camera.getProjMatrix());
+   firework3.get().addChild(fireworkParticleEmitterYellow);
+
+
+
    float seconds = 0.0f;
    float deltaTimeS = 0.0f;
    float curAnimationTimeS = 0.0f;
@@ -389,6 +422,7 @@ int main(int argc, char *argv[])
    bool valueFire = false;
    bool valueSmoke = false;
    bool valueWater = false;
+   float plane = -2.0f;
    while (eng.processEvents())
    {
       auto start = timer.now();
@@ -406,8 +440,8 @@ int main(int argc, char *argv[])
          while (curAnimationTimeS > animationDurationS) {
             curAnimationTimeS -= animationDurationS;
          }
-         float rotVal = lerp(0.0f, glm::two_pi<float>(), curAnimationTimeS / animationDurationS);
-         torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(190.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(glm::sin(rotVal) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
+         //float rotVal = lerp(0.0f, glm::two_pi<float>(), curAnimationTimeS / animationDurationS);
+         torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(190.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
          root.get().setMatrix(glm::mat4(1.0f));
       }
 
@@ -426,8 +460,17 @@ int main(int argc, char *argv[])
          fireParticleEmitter.setDt(currentFps);
          fireParticleEmitter.setPlaneMinimum(-5.0f);
 
-         waterParticleEmitter.setDt(currentFps);
-         waterParticleEmitter.setPlaneMinimum(-19.0f);
+         fireworkParticleEmitterRed.setDt(currentFps);
+         fireworkParticleEmitterRed.setPlaneMinimum(plane);
+
+         fireworkParticleEmitterBlue.setDt(currentFps);
+         fireworkParticleEmitterBlue.setPlaneMinimum(plane);
+
+         fireworkParticleEmitterGreen.setDt(currentFps);
+         fireworkParticleEmitterGreen.setPlaneMinimum(plane);
+
+         fireworkParticleEmitterYellow.setDt(currentFps);
+         fireworkParticleEmitterYellow.setPlaneMinimum(plane);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
@@ -438,10 +481,8 @@ int main(int argc, char *argv[])
          eng.getImgui()->newClick("Smoke", valueSmoke);
          eng.getImgui()->newClick("Water", valueWater);
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-             if (valueSmoke) {
                  createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
                  smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
-             }
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
@@ -460,6 +501,10 @@ int main(int argc, char *argv[])
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
          smokeParticleEmitter.setBounciness(bounciness);
+         fireworkParticleEmitterRed.setBounciness(0.0f);
+         fireworkParticleEmitterGreen.setBounciness(0.0f);
+         fireworkParticleEmitterBlue.setBounciness(0.0f);
+         fireworkParticleEmitterYellow.setBounciness(0.0f);
          eng.getImgui()->render();
       eng.swap();
 
