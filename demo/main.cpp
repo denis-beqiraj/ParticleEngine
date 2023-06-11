@@ -293,9 +293,7 @@ void updateParticles(std::vector<Eng::ParticleEmitter::Particle>& particles) {
         particles.at(i).currentPosition = particles.at(i).initPosition;
         particles.at(i).currentVelocity = particles.at(i).initVelocity;
         particles.at(i).currentAcceleration = particles.at(i).initAcceleration;
-        particles.at(i).initLife = ((float)rand() / RAND_MAX) * initLife.x;
         particles.at(i).currentLife = particles.at(i).initLife;
-        particles.at(i).minLife = ((float)rand() / RAND_MAX) * initLife.y;
     }
 }
 
@@ -500,26 +498,26 @@ int main(int argc, char *argv[])
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-            createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-            smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+             createParticlesWater(particlesWater, value, glm::vec4(1.0f, 1.0f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
-             updateParticles(particlesSmoke);
-             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+             updateParticles(particlesWater);
+             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
          }
          eng.getImgui()->newText("Start acceleration");
          if (eng.getImgui()->newBar("XA", startAcceleration.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YA", startAcceleration.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZA", startAcceleration.z, -100.0f, 100.0f)) {
-             updateParticles(particlesSmoke);
-             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+             updateParticles(particlesWater);
+             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
          }
          eng.getImgui()->newText("Life");
          if (eng.getImgui()->newBar("Init life", initLife.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLife.y, -100.0f, 100.0f)) {
-             updateParticles(particlesSmoke);
-             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+             updateParticles(particlesWater);
+             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
-         smokeParticleEmitter.setBounciness(bounciness);
+         waterBounce.setBounciness(bounciness);
          fireworkParticleEmitterRed.setBounciness(0.0f);
          fireworkParticleEmitterGreen.setBounciness(0.0f);
          fireworkParticleEmitterBlue.setBounciness(0.0f);
