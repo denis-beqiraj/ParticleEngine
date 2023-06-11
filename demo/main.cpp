@@ -252,8 +252,8 @@ void createParticlesWater(std::vector<Eng::ParticleEmitter::Particle>& particles
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
-        particle.initLife = rand01() * initLife.x;
-        particle.minLife = rand01() * initLife.y * 0.25f;
+        particle.initLife = rand01() * 20.0f;
+        particle.minLife = rand01() * -1.5f;
         particle.currentLife = particle.initLife;
         particle.colorStart = colorStart;
         particle.colorEnd = colorEnd;
@@ -330,8 +330,8 @@ int main(int argc, char *argv[])
    color = glm::vec3(1,0,0);
    initLife = glm::vec2(2, -5);
    createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-   createParticlesFire(particlesFire, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-   createParticlesWater(particlesWater, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesFire(particlesFire, value, glm::vec4(1.0f, 0.9f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+   createParticlesWater(particlesWater, 1000, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.7f, 0.7f, 1.0f, 0.0f));
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -427,7 +427,7 @@ int main(int argc, char *argv[])
          fireParticleEmitter.setPlaneMinimum(-5.0f);
 
          waterParticleEmitter.setDt(currentFps);
-         waterParticleEmitter.setPlaneMinimum(-20.0f);
+         waterParticleEmitter.setPlaneMinimum(-19.0f);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
