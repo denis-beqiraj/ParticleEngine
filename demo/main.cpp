@@ -412,6 +412,12 @@ int main(int argc, char *argv[])
    fireworkParticleEmitterYellow.setProjection(camera.getProjMatrix());
    firework3.get().addChild(fireworkParticleEmitterYellow);
 
+   Eng::ParticleEmitter waterBounce(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFireYellow));
+   sprite.load("flame.dds");
+   waterBounce.setTexture(sprite);
+   waterBounce.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, 0.0f)));
+   waterBounce.setProjection(camera.getProjMatrix());
+   root.get().addChild(waterBounce);
 
 
    float seconds = 0.0f;
@@ -471,6 +477,9 @@ int main(int argc, char *argv[])
 
          fireworkParticleEmitterYellow.setDt(currentFps);
          fireworkParticleEmitterYellow.setPlaneMinimum(plane);
+
+         waterBounce.setDt(currentFps);
+         waterBounce.setPlaneMinimum(plane);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
@@ -481,8 +490,8 @@ int main(int argc, char *argv[])
          eng.getImgui()->newClick("Smoke", valueSmoke);
          eng.getImgui()->newClick("Water", valueWater);
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-                 createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-                 smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+            createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+            smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
@@ -505,6 +514,7 @@ int main(int argc, char *argv[])
          fireworkParticleEmitterGreen.setBounciness(0.0f);
          fireworkParticleEmitterBlue.setBounciness(0.0f);
          fireworkParticleEmitterYellow.setBounciness(0.0f);
+         waterBounce.setBounciness(0.8f);
          eng.getImgui()->render();
       eng.swap();
 
