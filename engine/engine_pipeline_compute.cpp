@@ -38,9 +38,6 @@ uniform float dT;
 uniform float planeMinimum;
 uniform float bounciness;
 
-////////////
-// LIGHTS //
-////////////
    
 struct ParticleCompute 
 {    
@@ -95,7 +92,7 @@ float rand01()
 void main()
 {   
    
-    // Pixel coordinates:
+    
     uint i = gl_GlobalInvocationID.x;
     rng_state=i;
     if(i>particles.length()){
@@ -105,10 +102,10 @@ void main()
     if (particles[i].currentLife < particles[i].minLife) {
         // Spawn new particle
         float rColor = 0.5f + ((rand() % 100) / 100.0f);
-        particles[i].currentPosition = particles[i].initPosition; // TODO(jan): learnopengl has an offset parameter here. Do we need it?
+        particles[i].currentPosition = particles[i].initPosition;
         particles[i].currentLife = particles[i].initLife;
-        particles[i].currentVelocity = particles[i].initVelocity; // TODO(jan): calculate better initial velocity
-        particles[i].currentAcceleration = particles[i].initAcceleration; // TODO(jan): calculate better initial 
+        particles[i].currentVelocity = particles[i].initVelocity;
+        particles[i].currentAcceleration = particles[i].initAcceleration;
     } else {
         // Update particle
         particles[i].currentPosition = particles[i].currentPosition + particles[i].currentVelocity*dT;
