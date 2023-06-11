@@ -30,6 +30,18 @@ enum CameraMode {
    CameraMode_FirstPerson
 };
 
+// camera
+glm::vec3 cameraPos = glm::vec3(0.0f, 10.0f, 0.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+bool firstMouse = true;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
+
 //////////   
 // VARS //
 //////////
@@ -71,15 +83,39 @@ enum CameraMode {
 void mouseCursorCallback(double mouseX, double mouseY)
 {
    // ENG_LOG_DEBUG("x: %.1f, y: %.1f", mouseX, mouseY);
-   float deltaY = (float) (mouseX - oldMouseX);
-   oldMouseX = mouseX;
-   if (mouseBR)
-      rotY += deltaY;
+    float xpos = static_cast<float>(mouseX);
+    float ypos = static_cast<float>(mouseY);
 
-   float deltaX = (float) (mouseY - oldMouseY);
-   oldMouseY = mouseY;
-   if (mouseBR)
-      rotX += deltaX;
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
 }
 
 
@@ -123,6 +159,7 @@ void mouseScrollCallback(double scrollX, double scrollY)
  */
 void keyboardCallback(int key, int scancode, int action, int mods)
 {
+    float cameraSpeed = static_cast<float>(2.5);
    //ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
    if (cameraMode == CameraMode_Default) {
       switch (key) {
@@ -132,34 +169,18 @@ void keyboardCallback(int key, int scancode, int action, int mods)
    } else if (cameraMode == CameraMode_FirstPerson) {
       switch (key) {
          case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
-         case 'A': {
-               if (action == 0) {
-                  firstPersonDesiredRotVelocity = 0.0f;
-               } else {
-                  firstPersonDesiredRotVelocity = 5.0f;
-               }
-         } break;
-         case 'D': {
-               if (action == 0) {
-                  firstPersonDesiredRotVelocity = 0.0f;
-               } else {
-                  firstPersonDesiredRotVelocity = -5.0f;
-               }
-         } break;
-         case 'W': {
-            if (action == 0) {
-               firstPersonDesiredVelocity = 0.0f;
-            } else {
-               firstPersonDesiredVelocity = -120.0f;
-            }
-         } break;
-         case 'S': {
-            if (action == 0) {
-               firstPersonDesiredVelocity = 0.0f;
-            } else {
-               firstPersonDesiredVelocity = 120.0f;
-            }
-         } break;
+         case 'W': 
+                 cameraPos += cameraSpeed * cameraFront;
+             break;
+         case 'S': 
+                 cameraPos -= cameraSpeed * cameraFront;
+             break;
+         case 'A': 
+                 cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+             break;
+         case 'D': 
+                 cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+             break;
       }
    }
 }
@@ -204,6 +225,30 @@ void createParticlesFire(std::vector<Eng::ParticleEmitter::Particle>& particles,
         particle.initVelocity = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
         alpha = rand01() * glm::two_pi<float>();
         particle.initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particle.currentPosition = particle.initPosition;
+        particle.currentVelocity = particle.initVelocity;
+        particle.currentAcceleration = particle.initAcceleration;
+        particle.initLife = rand01() * initLife.x;
+        particle.minLife = rand01() * initLife.y * 0.25f;
+        particle.currentLife = particle.initLife;
+        particle.colorStart = colorStart;
+        particle.colorEnd = colorEnd;
+        particle.scaleStart = randXY(3.0f, 5.0f);
+        particle.scaleEnd = randXY(5.5f, 6.0f);
+        particles.push_back(particle);
+    }
+}
+
+void createParticlesWater(std::vector<Eng::ParticleEmitter::Particle>& particles, int maxParticles, glm::vec4 colorStart, glm::vec4 colorEnd) {
+    particles.clear();
+    for (int i = 0; i < maxParticles; i++) {
+        Eng::ParticleEmitter::Particle particle;
+        float alpha = rand01() * glm::two_pi<float>();
+        particle.initPosition = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
+        alpha = rand01() * glm::two_pi<float>();
+        particle.initVelocity = glm::vec4(glm::sin(alpha), 0.0f, glm::cos(alpha), 0.0f);
+        alpha = rand01() * glm::two_pi<float>();
+        particle.initAcceleration = glm::vec4(-startAcceleration, 0.0f);
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
@@ -275,16 +320,18 @@ int main(int argc, char *argv[])
    Eng::Ovo ovo; 
 
    std::reference_wrapper<Eng::Node> root = ovo.load("demo.ovo");
-   std::vector<Eng::ParticleEmitter::Particle> particles;
-   std::vector<Eng::ParticleEmitter::Particle> fireParticles;
+   std::vector<Eng::ParticleEmitter::Particle> particlesSmoke;
+   std::vector<Eng::ParticleEmitter::Particle> particlesWater;
+   std::vector<Eng::ParticleEmitter::Particle> particlesFire;
    float value;
    value = 120;
    startVelocity = glm::vec3(8, -2, 8);
    startAcceleration = glm::vec3(0, 2.8, 0);
    color = glm::vec3(1,0,0);
    initLife = glm::vec2(2, -5);
-   createParticlesSmoke(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-   createParticlesFire(fireParticles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+   createParticlesFire(particlesFire, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesWater(particlesWater, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
    
@@ -297,6 +344,7 @@ int main(int argc, char *argv[])
    // Get torus knot ref:
    std::reference_wrapper<Eng::Mesh> torch = dynamic_cast<Eng::Mesh &>(Eng::Container::getInstance().find("Box001"));
    std::reference_wrapper<Eng::Mesh> torchBase = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Arm"));
+   std::reference_wrapper<Eng::Mesh> sphere = dynamic_cast<Eng::Mesh&>(Eng::Container::getInstance().find("Sphere001"));
 
    // Rendering elements:
    Eng::List list;
@@ -310,27 +358,37 @@ int main(int argc, char *argv[])
    float fpsFactor = 1.0f;
    float currentFps = 0.0f;
    float bounciness = 0.8f;
-   Eng::ParticleEmitter particleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
+   Eng::ParticleEmitter smokeParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
    Eng::Bitmap sprite;
    sprite.load("smoke.dds");
-   particleEmitter.setTexture(sprite);
-   particleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 12.0f, 0.0f)));
-   particleEmitter.setProjection(camera.getProjMatrix());
-   torch.get().addChild(particleEmitter);
+   smokeParticleEmitter.setTexture(sprite);
+   smokeParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 12.0f, 0.0f)));
+   smokeParticleEmitter.setProjection(camera.getProjMatrix());
+   torch.get().addChild(smokeParticleEmitter);
    //computePipe.convert(particles);
 
    // fire
-   Eng::ParticleEmitter fireParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(fireParticles));
+   Eng::ParticleEmitter fireParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesFire));
    sprite.load("flame.dds");
    fireParticleEmitter.setTexture(sprite);
    fireParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f)));
    fireParticleEmitter.setProjection(camera.getProjMatrix());
-   particleEmitter.addChild(fireParticleEmitter);
+   smokeParticleEmitter.addChild(fireParticleEmitter);
+
+   Eng::ParticleEmitter waterParticleEmitter(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
+   sprite.load("flame.dds");
+   waterParticleEmitter.setTexture(sprite);
+   waterParticleEmitter.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f)));
+   waterParticleEmitter.setProjection(camera.getProjMatrix());
+   sphere.get().addChild(waterParticleEmitter);
    float seconds = 0.0f;
    float deltaTimeS = 0.0f;
    float curAnimationTimeS = 0.0f;
    float animationDurationS = 2.0f;
    glm::vec3 torchOffset = glm::vec3(2.0f, 0.0f, 0.0f);
+   bool valueFire = false;
+   bool valueSmoke = false;
+   bool valueWater = false;
    while (eng.processEvents())
    {
       auto start = timer.now();
@@ -340,16 +398,9 @@ int main(int argc, char *argv[])
          camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
          root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
       } else if (cameraMode == CameraMode_FirstPerson) {
-         // Update rotation according to desired velocity
-         firstPersonRotVelocity = lerp(firstPersonRotVelocity, firstPersonDesiredRotVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
-         firstPersonRot += firstPersonRotVelocity * deltaTimeS;
-
-         // Update position according to desired velocity
-         glm::vec3 cameraFront = glm::rotate(glm::quat(glm::vec3(0.0f, firstPersonRot, 0.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-         firstPersonVelocity = lerp(firstPersonVelocity, firstPersonDesiredVelocity, deltaTimeS * firstPersonVelocityTransitionSpeed);
-         firstPersonPosition += cameraFront * firstPersonVelocity * deltaTimeS;
+         
          // Calculate camera matrix
-         glm::mat4 cameraMat = glm::translate(glm::mat4(1.0f), firstPersonPosition) * glm::rotate(glm::mat4(1.0f), firstPersonRot, glm::vec3(0.0f, 1.0f, 0.0f));
+         glm::mat4 cameraMat = glm::inverse(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp));
          camera.setMatrix(cameraMat);
          curAnimationTimeS += deltaTimeS;
          while (curAnimationTimeS > animationDurationS) {
@@ -364,42 +415,51 @@ int main(int argc, char *argv[])
       // Update list:
       list.reset();
       list.process(root);
+
       // Main rendering:
       eng.clear();
          //particleEmitter.render(0U,(void*)&data);
          dfltPipe.render(camera, list);
-         particleEmitter.setDt(currentFps);
-         particleEmitter.setPlaneMinimum(-5.0f);
+         smokeParticleEmitter.setDt(currentFps);
+         smokeParticleEmitter.setPlaneMinimum(-5.0f);
 
          fireParticleEmitter.setDt(currentFps);
          fireParticleEmitter.setPlaneMinimum(-5.0f);
+
+         waterParticleEmitter.setDt(currentFps);
+         waterParticleEmitter.setPlaneMinimum(-20.0f);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
          // Uncomment the following two lines for displaying the shadow map:
          // eng.clear();      
          //  full2dPipe.render(dfltPipe.getShadowMappingPipeline().getShadowMap(), list);
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
+         eng.getImgui()->newClick("Fire", valueFire);
+         eng.getImgui()->newClick("Smoke", valueSmoke);
+         eng.getImgui()->newClick("Water", valueWater);
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-             createParticlesSmoke(particles, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-             particleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
+             if (valueSmoke) {
+                 createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+                 smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
+             }
          }
          eng.getImgui()->newText("Start velocity");
          if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
-             updateParticles(particles);
-             particleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
+             updateParticles(particlesSmoke);
+             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
          }
          eng.getImgui()->newText("Start acceleration");
          if (eng.getImgui()->newBar("XA", startAcceleration.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YA", startAcceleration.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZA", startAcceleration.z, -100.0f, 100.0f)) {
-             updateParticles(particles);
-             particleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
+             updateParticles(particlesSmoke);
+             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
          }
          eng.getImgui()->newText("Life");
          if (eng.getImgui()->newBar("Init life", initLife.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLife.y, -100.0f, 100.0f)) {
-             updateParticles(particles);
-             particleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particles));
+             updateParticles(particlesSmoke);
+             smokeParticleEmitter.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesSmoke));
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
-         particleEmitter.setBounciness(bounciness);
+         smokeParticleEmitter.setBounciness(bounciness);
          eng.getImgui()->render();
       eng.swap();
 

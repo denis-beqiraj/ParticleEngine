@@ -233,7 +233,6 @@ bool ENG_API Eng::Base::init()
       return false;
    }
    glfwSetWindowUserPointer(reserved->window, this);
-
    // Set context:
    glfwMakeContextCurrent(reserved->window);
 

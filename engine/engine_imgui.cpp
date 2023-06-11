@@ -48,6 +48,18 @@ void ENG_API Eng::ImGuiEngine::newText(std::string text)
     ImGui::Text(text.c_str());               // Display some text (you can use a format strings too)
 }
 
+bool ENG_API Eng::ImGuiEngine::newClick(std::string click, bool& value)
+{
+    float old = value;
+    ImGui::Checkbox(click.c_str(), &value);
+    if (old != value) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 void ENG_API Eng::ImGuiEngine::render()
 {
     ImGui::End();
