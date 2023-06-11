@@ -355,10 +355,10 @@ int main(int argc, char *argv[])
    initLife = glm::vec2(2, -5);
    createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
    createParticlesFire(particlesFire, value, glm::vec4(1.0f, 0.9f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-   createParticlesFirework(particlesFireRed, value, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-   createParticlesFirework(particlesFireGreen, value, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-   createParticlesFirework(particlesFireBlue, value, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-   createParticlesFirework(particlesFireYellow, value, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesFirework(particlesFireRed, 2000.0f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesFirework(particlesFireGreen, 2000.0f, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesFirework(particlesFireBlue, 2000.0f, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesFirework(particlesFireYellow, 2000.0f, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
    createParticlesWater(particlesWater, 10000.0f, glm::vec4(0.5f, 0.4f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
 
@@ -532,6 +532,10 @@ int main(int argc, char *argv[])
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
          waterBounce.setBounciness(bounciness);
+         fireworkParticleEmitterRed.setBounciness(-1.0f);
+         fireworkParticleEmitterBlue.setBounciness(-1.0f);
+         fireworkParticleEmitterGreen.setBounciness(-1.0f);
+         fireworkParticleEmitterYellow.setBounciness(-1.0f);
          if (eng.getImgui()->newButton("Start fireworks")) {
              startFireworks = true;
          }
