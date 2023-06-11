@@ -241,7 +241,7 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
           startRange = reserved->nrOfLights + reserved->nrOfOpaqueMeshes;
           endRange = startRange + reserved->nrOfTransparentMeshes;
           std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.begin() + endRange, [cameraMatrix](RenderableElem a, RenderableElem b) {
-              return glm::length(a.matrix[3] - cameraMatrix[3]) < glm::length(b.matrix[3] - cameraMatrix[3]);
+              return glm::length(a.matrix[3] - glm::inverse(cameraMatrix)[3]) > glm::length(b.matrix[3] - glm::inverse(cameraMatrix)[3]);
               });
           isTrasparent = true;
           break;
@@ -254,6 +254,9 @@ bool ENG_API Eng::List::render(const glm::mat4 &cameraMatrix, Eng::List::Pass pa
 
       case Pass::particleemitters:
           startRange = reserved->nrOfLights + reserved->nrOfOpaqueMeshes + reserved->nrOfTransparentMeshes;
+          std::sort(reserved->renderableElem.begin() + startRange, reserved->renderableElem.begin() + endRange, [cameraMatrix](RenderableElem a, RenderableElem b) {
+              return glm::length(a.matrix[3] - glm::inverse(cameraMatrix)[3]) > glm::length(b.matrix[3] - glm::inverse(cameraMatrix)[3]);
+              });
           isParticle = true;
           break;
    }
