@@ -23,6 +23,7 @@ public: //
 	bool newBar(std::string type,float& value,float min,float max);
 	void newText(std::string text);
 	bool newClick(std::string click,bool& value);
+	bool newButton(std::string text);
 	void render();
 };
 

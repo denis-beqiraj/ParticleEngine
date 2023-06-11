@@ -60,6 +60,11 @@ bool ENG_API Eng::ImGuiEngine::newClick(std::string click, bool& value)
     }
 }
 
+bool ENG_API Eng::ImGuiEngine::newButton(std::string text)
+{
+    return ImGui::Button(text.c_str());
+}
+
 void ENG_API Eng::ImGuiEngine::render()
 {
     ImGui::End();

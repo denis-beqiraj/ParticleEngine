@@ -82,40 +82,42 @@ float fov = 45.0f;
  */
 void mouseCursorCallback(double mouseX, double mouseY)
 {
-   // ENG_LOG_DEBUG("x: %.1f, y: %.1f", mouseX, mouseY);
-    float xpos = static_cast<float>(mouseX);
-    float ypos = static_cast<float>(mouseY);
+    if (cameraMode == CameraMode_FirstPerson) {
+        // ENG_LOG_DEBUG("x: %.1f, y: %.1f", mouseX, mouseY);
+        float xpos = static_cast<float>(mouseX);
+        float ypos = static_cast<float>(mouseY);
 
-    if (firstMouse)
-    {
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
+
+        float sensitivity = 0.1f; // change this value to your liking
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
     }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-    lastX = xpos;
-    lastY = ypos;
-
-    float sensitivity = 0.1f; // change this value to your liking
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
 }
 
 
@@ -357,7 +359,7 @@ int main(int argc, char *argv[])
    createParticlesFirework(particlesFireGreen, value, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
    createParticlesFirework(particlesFireBlue, value, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
    createParticlesFirework(particlesFireYellow, value, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-   createParticlesWater(particlesWater, 1000.0f, glm::vec4(1.0f, 1.0f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+   createParticlesWater(particlesWater, 10000.0f, glm::vec4(0.5f, 0.4f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
 
    std::cout << "Scene graph:\n" << root.get().getTreeAsString() << std::endl;
@@ -445,21 +447,24 @@ int main(int argc, char *argv[])
    float deltaTimeS = 0.0f;
    glm::vec3 torchOffset = glm::vec3(2.0f, 0.0f, 0.0f);
    float plane = -2.0f;
+   bool startFireworks = false;
+   glm::vec3 velocity = glm::vec3(0.0f, 10.0f, 0.0f);
+   startAcceleration.y = -startAcceleration.y;
+   value = 10000.0f;
    while (eng.processEvents())
    {
       auto start = timer.now();
 
       // Update viewpoint:
       if (cameraMode == CameraMode_Default) {
-         camera.setMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 10.0f, transZ)));
-         root.get().setMatrix(glm::rotate(glm::rotate(glm::mat4(1.0f), glm::radians(rotX), { 1.0f, 0.0f, 0.0f }), glm::radians(rotY), { 0.0f, 1.0f, 0.0f }));
+          glm::mat4 cameraMat = glm::inverse(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp));
+          camera.setMatrix(cameraMat);
       } else if (cameraMode == CameraMode_FirstPerson) {
          
          // Calculate camera matrix
          glm::mat4 cameraMat = glm::inverse(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp));
          camera.setMatrix(cameraMat);
          torchBase.get().setMatrix(cameraMat*glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, -5.0f, -17.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(190.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.7f)));
-         root.get().setMatrix(glm::mat4(1.0f));
       }
 
       // Animate torus knot:      
@@ -476,19 +481,26 @@ int main(int argc, char *argv[])
 
          fireParticleEmitter.setDt(currentFps);
          fireParticleEmitter.setPlaneMinimum(-5.0f);
+         if (!startFireworks) {
+             fireworkParticleEmitterRed.setDt(currentFps);
+             fireworkParticleEmitterRed.setPlaneMinimum(plane);
 
-         fireworkParticleEmitterRed.setDt(currentFps);
-         fireworkParticleEmitterRed.setPlaneMinimum(plane);
+             fireworkParticleEmitterBlue.setDt(currentFps);
+             fireworkParticleEmitterBlue.setPlaneMinimum(plane);
 
-         fireworkParticleEmitterBlue.setDt(currentFps);
-         fireworkParticleEmitterBlue.setPlaneMinimum(plane);
+             fireworkParticleEmitterGreen.setDt(currentFps);
+             fireworkParticleEmitterGreen.setPlaneMinimum(plane);
 
-         fireworkParticleEmitterGreen.setDt(currentFps);
-         fireworkParticleEmitterGreen.setPlaneMinimum(plane);
-
-         fireworkParticleEmitterYellow.setDt(currentFps);
-         fireworkParticleEmitterYellow.setPlaneMinimum(plane);
-
+             fireworkParticleEmitterYellow.setDt(currentFps);
+             fireworkParticleEmitterYellow.setPlaneMinimum(plane);
+         }
+         else {
+             plane = plane - velocity.y * currentFps;
+             fireworkParticleEmitterRed.setPlaneMinimum(plane);
+             fireworkParticleEmitterBlue.setPlaneMinimum(plane);
+             fireworkParticleEmitterGreen.setPlaneMinimum(plane);
+             fireworkParticleEmitterYellow.setPlaneMinimum(plane);
+         }
          waterBounce.setDt(currentFps);
          waterBounce.setPlaneMinimum(-1.0f);
          //particlePipe.render(tknot.get().getMaterial().getTexture(), list);
@@ -498,7 +510,8 @@ int main(int argc, char *argv[])
          eng.getImgui()->newFrame();
          eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
          if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
-             createParticlesWater(particlesWater, value, glm::vec4(1.0f, 1.0f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+             createParticlesWater(particlesWater, value, glm::vec4(0.5f, 0.4f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+             updateParticles(particlesWater);
              waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
          }
          eng.getImgui()->newText("Start velocity");
@@ -518,14 +531,17 @@ int main(int argc, char *argv[])
          }
          eng.getImgui()->newBar("Bounciness", bounciness, 0.0f, 1.0f);
          waterBounce.setBounciness(bounciness);
-         fireworkParticleEmitterRed.setBounciness(0.0f);
-         fireworkParticleEmitterGreen.setBounciness(0.0f);
-         fireworkParticleEmitterBlue.setBounciness(0.0f);
-         fireworkParticleEmitterYellow.setBounciness(0.0f);
-         waterBounce.setBounciness(0.8f);
+         if (eng.getImgui()->newButton("Start fireworks")) {
+             startFireworks = true;
+         }
          eng.getImgui()->render();
       eng.swap();
-
+      if (startFireworks) {
+          firework.get().setMatrix(firework.get().getMatrix() * glm::translate(glm::mat4(1.0f), velocity * currentFps));
+          firework1.get().setMatrix(firework1.get().getMatrix() * glm::translate(glm::mat4(1.0f), velocity * currentFps));
+          firework2.get().setMatrix(firework2.get().getMatrix() * glm::translate(glm::mat4(1.0f), velocity * currentFps));
+          firework3.get().setMatrix(firework3.get().getMatrix() * glm::translate(glm::mat4(1.0f), velocity * currentFps));
+      }
       auto stop = timer.now();
       std::chrono::duration<float> fs = stop - start;
       deltaTimeS = fs.count();
