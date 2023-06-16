@@ -174,6 +174,7 @@ public: //
    bool setMouseCursorCallback(MouseCursorCallback cb);
    bool setMouseButtonCallback(MouseButtonCallback cb);
    bool setMouseScrollCallback(MouseScrollCallback cb);
+   void setMouseCursorActive(bool mouseCursorActive);
    bool initImgui();
    // Compatibility:
    bool isBindlessSupported() const;

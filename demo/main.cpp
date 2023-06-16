@@ -41,6 +41,7 @@ float pitch = 0.0f;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 float fov = 45.0f;
+bool mouseCursorActive = true;
 
 //////////   
 // VARS //
@@ -82,7 +83,7 @@ float fov = 45.0f;
  */
 void mouseCursorCallback(double mouseX, double mouseY)
 {
-    if (cameraMode == CameraMode_FirstPerson) {
+    if (!mouseCursorActive && cameraMode == CameraMode_FirstPerson) {
         // ENG_LOG_DEBUG("x: %.1f, y: %.1f", mouseX, mouseY);
         float xpos = static_cast<float>(mouseX);
         float ypos = static_cast<float>(mouseY);
@@ -171,18 +172,15 @@ void keyboardCallback(int key, int scancode, int action, int mods)
    } else if (cameraMode == CameraMode_FirstPerson) {
       switch (key) {
          case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
-         case 'W': 
-                 cameraPos += cameraSpeed * cameraFront;
-             break;
-         case 'S': 
-                 cameraPos -= cameraSpeed * cameraFront;
-             break;
-         case 'A': 
-                 cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-             break;
-         case 'D': 
-                 cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-             break;
+         case 'W': if (action == 1 || action == 2) cameraPos += cameraSpeed * cameraFront; break;
+         case 'S': if (action == 1 || action == 2) cameraPos -= cameraSpeed * cameraFront; break;
+         case 'A': if (action == 1 || action == 2) cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed; break;
+         case 'D': if (action == 1 || action == 2) cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed; break;
+         case 'R': if (action == 0) {
+            mouseCursorActive = !mouseCursorActive;
+            Eng::Base::getInstance().setMouseCursorActive(mouseCursorActive);
+            firstMouse = true;
+         } break;
       }
    }
 }

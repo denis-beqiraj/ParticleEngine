@@ -487,6 +487,14 @@ bool ENG_API Eng::Base::setMouseCursorCallback(MouseCursorCallback cb)
    return true;
 }
 
+void ENG_API Eng::Base::setMouseCursorActive(bool mouseCursorActive)
+{
+   if (mouseCursorActive) {
+      glfwSetInputMode(reserved->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+   } else {
+      glfwSetInputMode(reserved->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
