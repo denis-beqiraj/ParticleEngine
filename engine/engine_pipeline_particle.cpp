@@ -57,76 +57,32 @@ uniform mat4 view;
 
 void main()
 {
-    mat4 wTm = mat4(1.0f);
-    wTm[3] = vec4(transforms[gl_InstanceID].position, 1.0f);
-    color = transforms[gl_InstanceID].color;
-    scale = transforms[gl_InstanceID].scale;
-    gl_Position = view*model*wTm * vec4(vertex.xy, 0.0, 1.0);
-    texCoord = vertex.zw;
+    ParticleTransform particle = transforms[gl_InstanceID];
+
+    color = particle.color;
+    scale = particle.scale;
+
+    float half_size = 0.5f * scale;
+
+    vec2 offset;
+    if (gl_VertexID == 0 || gl_VertexID == 3) {
+        offset = vec2(-half_size, -half_size);
+        texCoord = vec2(0.0f, 0.0f);
+    } else if (gl_VertexID == 1) {
+        offset = vec2(half_size, -half_size);
+        texCoord = vec2(1.0f, 0.0f);
+    } else if (gl_VertexID == 2 || gl_VertexID == 4) {
+        offset = vec2(half_size, half_size);
+        texCoord = vec2(1.0f, 1.0f);
+    } else {
+        offset = vec2(-half_size, half_size);
+        texCoord = vec2(0.0f, 1.0f);
+    }
+
+    vec4 viewPos = view * model * vec4(particle.position, 1.0);
+    vec2 pv = viewPos.xy + offset;
+    gl_Position = projection * vec4(pv, viewPos.zw);
 })";
-
-static const std::string pipeline_gs = R"(
-
-layout (points) in;
-layout (triangle_strip, max_vertices = 4) out;
-
-// In:
-in vec2 texCoord[];
-in vec4 color[]; // New input for color
-in float scale[];
-
-// Out:
-out vec2 texCoordG;
-out vec4 colorG; // Pass the color to fragment shader
-
-// Uniforms:
-uniform mat4 projection;
-uniform mat4 model;
-uniform mat4 view;
-
-void main()
-{
-    float halfSize = 0.5f * scale[0];
-    vec4 p = gl_in[0].gl_Position;
-    // Lower left vertex:
-    {
-        vec2 pv = p.xy + vec2(-halfSize, -halfSize);
-        gl_Position = projection * vec4(pv, p.zw);
-        texCoordG = vec2(0.0, 0.0);
-        colorG = color[0]; // Pass the color from vertex shader
-        EmitVertex();
-    }
-
-    // Upper left vertex:
-    {
-        vec2 pv = p.xy + vec2(-halfSize, halfSize);
-        gl_Position = projection * vec4(pv, p.zw);
-        texCoordG = vec2(0.0, 1.0);
-        colorG = color[0]; // Pass the color from vertex shader
-        EmitVertex();
-    }
-
-    // Lower right vertex:
-    {
-        vec2 pv = p.xy + vec2(halfSize, -halfSize);
-        gl_Position = projection * vec4(pv, p.zw);
-        texCoordG = vec2(1.0, 0.0);
-        colorG = color[0]; // Pass the color from vertex shader
-        EmitVertex();
-    }
-
-    // Upper right vertex:
-    {
-        vec2 pv = p.xy + vec2(halfSize, halfSize);
-        gl_Position = projection * vec4(pv, p.zw);
-        texCoordG = vec2(1.0, 1.0);
-        colorG = color[0]; // Pass the color from vertex shader
-        EmitVertex();
-    }
-
-    EndPrimitive();
-}
-)";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -142,16 +98,16 @@ static const std::string pipeline_fs_3 = R"(
 #endif
 
 // In:   
-in vec2 texCoordG;
-in vec4 colorG; // New input for color
+in vec2 texCoord;
+in vec4 color; // New input for color
 
 // Out:
 out vec4 outFragment;
 
 void main()
 {
-    vec4 particle = texture(texture0, texCoordG);
-    outFragment = particle*colorG; // Output the color passed from the vertex shader
+    vec4 particle = texture(texture0, texCoord);
+    outFragment = particle*color; // Output the color passed from the vertex shader
 })";
 
 /////////////////////////
@@ -247,8 +203,7 @@ bool ENG_API Eng::PipelineParticle::init()
     // Build:
     reserved->vs.load(Eng::Shader::Type::vertex, pipeline_vs_3);
     reserved->fs.load(Eng::Shader::Type::fragment, pipeline_fs_3);
-    reserved->gs.load(Eng::Shader::Type::geometry, pipeline_gs);
-    if (reserved->program.build({ reserved->vs, reserved->fs, reserved->gs }) == false)
+    if (reserved->program.build({ reserved->vs, reserved->fs }) == false)
     {
         ENG_LOG_ERROR("Unable to build fullscreen2D program");
         return false;
@@ -262,21 +217,6 @@ bool ENG_API Eng::PipelineParticle::init()
         return false;
     }
 
-    // TODO(jan): Do we need the vbo information, since we only render points?
-    unsigned int VBO;
-    float particle_quad[] = {
-        0.0f, 1.0f, 0.0f, 1.0f,
-    };
-    glGenVertexArrays(1, &reserved->particle);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(reserved->particle);
-    // fill mesh buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(particle_quad), particle_quad, GL_STATIC_DRAW);
-    // set mesh attributes
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glBindVertexArray(0);
     // Done: 
     this->setDirty(false);
     return true;
@@ -349,10 +289,8 @@ bool ENG_API Eng::PipelineParticle::render(const Eng::Texture& texture, unsigned
     program.setMat4("projection", reserved->projection);
     program.setMat4("model", reserved->model);
     program.setMat4("view", reserved->view);
-    glBindVertexArray(reserved->particle);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawArraysInstanced(GL_POINTS, 0, 1, particleCount);
-    glBindVertexArray(0);
+    reserved->vao.render();
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particleCount);
 
     // Done:   
     return true;
