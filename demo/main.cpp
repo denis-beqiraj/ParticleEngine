@@ -52,10 +52,12 @@ float rotX, rotY;
 bool mouseBR, mouseBL;
 float transZ = 50.0f;
 glm::vec3 startVelocity;
+glm::vec3 startVelocityWater;
 glm::vec3 startAcceleration;
 glm::vec3 startAccelerationWater;
 glm::vec3 color;
 glm::vec2 initLife;
+glm::vec2 initLifeWater;
 
 // Camera:
 CameraMode cameraMode;
@@ -270,13 +272,13 @@ void createParticlesWater(std::vector<Eng::ParticleEmitter::Particle>& particles
     for (int i = 0; i < maxParticles; i++) {
         Eng::ParticleEmitter::Particle particle;
         particle.initPosition = glm::vec4(0.0f);
-        particle.initVelocity = glm::vec4(rand01() * 2 - 1, 10.0f, rand01() * 2 - 1, rand01() * 2 - 1);
+        particle.initVelocity = glm::vec4((rand01() * 2 - 1)* startVelocityWater.x, startVelocityWater.y, (rand01() * 2 - 1) * startVelocityWater.z, rand01() * 2 - 1);
         particle.initAcceleration = glm::vec4(startAccelerationWater, 0.0f);
         particle.currentPosition = particle.initPosition;
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
-        particle.initLife = rand01() * 2.5f;
-        particle.minLife = rand01() * -10.5f;
+        particle.initLife = rand01() * initLifeWater.x;
+        particle.minLife = rand01() * initLifeWater.y;
         particle.currentLife = particle.minLife + rand01() * (particle.initLife - particle.minLife);
         particle.colorStart = colorStart;
         particle.colorEnd = colorEnd;
@@ -294,13 +296,13 @@ float lerp(float a, float b, float t) {
 void updateParticles(std::vector<Eng::ParticleEmitter::Particle>& particles) {
     for (int i = 0; i < particles.size(); i++) {
         particles.at(i).initPosition = glm::vec4(0.0f);
-        particles.at(i).initVelocity = glm::vec4(rand01() * 2 - 1, 10.0f, rand01() * 2 - 1, rand01() * 2 - 1);
+        particles.at(i).initVelocity = glm::vec4((rand01() * 2 - 1) * startVelocityWater.x, startVelocityWater.y, (rand01() * 2 - 1) * startVelocityWater.z, rand01() * 2 - 1);
         particles.at(i).initAcceleration = glm::vec4(startAccelerationWater, 0.0f);
         particles.at(i).currentPosition = particles.at(i).initPosition;
         particles.at(i).currentVelocity = particles.at(i).initVelocity;
         particles.at(i).currentAcceleration = particles.at(i).initAcceleration;
-        particles.at(i).initLife = rand01() * 2.5f;
-        particles.at(i).minLife = rand01() * -10.5f;
+        particles.at(i).initLife = rand01() * initLifeWater.x;
+        particles.at(i).minLife = rand01() * initLifeWater.y;
         particles.at(i).currentLife = particles.at(i).minLife + rand01() * (particles.at(i).initLife - particles.at(i).minLife);
         particles.at(i).scaleStart = 0.5f;
         particles.at(i).scaleEnd = 0.5f;
@@ -362,6 +364,8 @@ int main(int argc, char* argv[])
     color = glm::vec3(1, 0, 0);
     initLife = glm::vec2(2, -5);
     startAccelerationWater = glm::vec3(0, -2.8, 0);
+    startVelocityWater = glm::vec3(1.0f, 4.0f, 1.0f);
+    initLifeWater = glm::vec2(2.5f, -10.5f);
     createParticlesSmoke(particlesSmoke, value, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
     createParticlesFire(particlesFire, value, glm::vec4(1.0f, 0.9f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
     createParticlesFirework(particlesFireRed, 2000.0f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
@@ -524,7 +528,7 @@ int main(int argc, char* argv[])
             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
         }
         eng.getImgui()->newText("Start velocity");
-        if (eng.getImgui()->newBar("XV", startVelocity.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocity.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocity.z, -100.0f, 100.0f)) {
+        if (eng.getImgui()->newBar("XV", startVelocityWater.x, -100.0f, 100.0f) | eng.getImgui()->newBar("YV", startVelocityWater.y, -100.0f, 100.0f) | eng.getImgui()->newBar("ZV", startVelocityWater.z, -100.0f, 100.0f)) {
             updateParticles(particlesWater);
             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
         }
@@ -534,7 +538,7 @@ int main(int argc, char* argv[])
             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
         }
         eng.getImgui()->newText("Life");
-        if (eng.getImgui()->newBar("Init life", initLife.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLife.y, -100.0f, 100.0f)) {
+        if (eng.getImgui()->newBar("Init life", initLifeWater.x, -100.0f, 100.0f) | eng.getImgui()->newBar("End life", initLifeWater.y, -100.0f, 100.0f)) {
             updateParticles(particlesWater);
             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
         }
