@@ -165,13 +165,20 @@ void keyboardCallback(int key, int scancode, int action, int mods)
     //ENG_LOG_DEBUG("key: %d, scancode: %d, action: %d, mods: %d", key, scancode, action, mods);
     if (cameraMode == CameraMode_Default) {
         switch (key) {
-        case 'C': if (action == 0) cameraMode = CameraMode_FirstPerson; break;
+        case 'C': if (action == 0) {
+            cameraMode = CameraMode_FirstPerson; 
+            Eng::Base::getInstance().setMouseCursorActive(false);
+            firstMouse = true;
+        } break;
         case 'W': if (action == 0) dfltPipe.setWireframe(!dfltPipe.isWireframe()); break;
         }
     }
     else if (cameraMode == CameraMode_FirstPerson) {
         switch (key) {
-        case 'C': if (action == 0) cameraMode = CameraMode_Default; break;
+        case 'C': if (action == 0) {
+            cameraMode = CameraMode_Default; 
+            Eng::Base::getInstance().setMouseCursorActive(true);
+        } break;
         case 'W':
             cameraPos += cameraSpeed * cameraFront;
             break;
@@ -331,6 +338,7 @@ int main(int argc, char* argv[])
     eng.setMouseButtonCallback(mouseButtonCallback);
     eng.setMouseScrollCallback(mouseScrollCallback);
     eng.setKeyboardCallback(keyboardCallback);
+    eng.setMouseCursorActive(false);
     eng.initImgui();
 
     cameraMode = CameraMode_FirstPerson;
