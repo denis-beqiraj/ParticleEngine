@@ -275,7 +275,7 @@ void createParticlesWater(std::vector<Eng::ParticleEmitter::Particle>& particles
         particle.currentVelocity = particle.initVelocity;
         particle.currentAcceleration = particle.initAcceleration;
         particle.initLife = rand01() * 2.5f;
-        particle.minLife = rand01() * -5.5f;
+        particle.minLife = rand01() * -10.5f;
         particle.currentLife = particle.minLife + rand01() * (particle.initLife - particle.minLife);
         particle.colorStart = colorStart;
         particle.colorEnd = colorEnd;
@@ -292,11 +292,17 @@ float lerp(float a, float b, float t) {
 
 void updateParticles(std::vector<Eng::ParticleEmitter::Particle>& particles) {
     for (int i = 0; i < particles.size(); i++) {
-        particles.at(i).initAcceleration = glm::vec4(startAcceleration, 0.0f);
+        particles.at(i).initPosition = glm::vec4(0.0f);
+        particles.at(i).initVelocity = glm::vec4(rand01() * 2 - 1, 10.0f, rand01() * 2 - 1, rand01() * 2 - 1);
+        particles.at(i).initAcceleration = glm::vec4(-startAcceleration, 0.0f);
         particles.at(i).currentPosition = particles.at(i).initPosition;
         particles.at(i).currentVelocity = particles.at(i).initVelocity;
         particles.at(i).currentAcceleration = particles.at(i).initAcceleration;
-        particles.at(i).currentLife = particles.at(i).initLife;
+        particles.at(i).initLife = rand01() * 2.5f;
+        particles.at(i).minLife = rand01() * -10.5f;
+        particles.at(i).currentLife = particles.at(i).minLife + rand01() * (particles.at(i).initLife - particles.at(i).minLife);
+        particles.at(i).scaleStart = 0.5f;
+        particles.at(i).scaleEnd = 0.5f;
     }
 }
 
@@ -514,7 +520,6 @@ int main(int argc, char* argv[])
         eng.getImgui()->newText("Fps: " + std::to_string(1.0f / fpsFactor));
         if (eng.getImgui()->newBar("Number particles", value, 1.0f, 200000.0f)) {
             createParticlesWater(particlesWater, value, glm::vec4(0.5f, 0.4f, 0.5f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-            updateParticles(particlesWater);
             waterBounce.setParticles(std::make_shared<std::vector<Eng::ParticleEmitter::Particle>>(particlesWater));
         }
         eng.getImgui()->newText("Start velocity");
